@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 class QCloseEvent;
+class QKeyEvent;
 class QStackedWidget;
 class MainMenuPage;
 class NewGamePage;
@@ -22,6 +23,7 @@ public:
 
 protected:
     void closeEvent(QCloseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
     void showNewGamePage();

@@ -7,6 +7,7 @@
 #include "SettingsPage.h"
 
 #include <QApplication>
+#include <QKeyEvent>
 #include <QScreen>
 #include <QStackedWidget>
 
@@ -83,6 +84,7 @@ void MainWindow::setupUI()
     connect(m_settings, &SettingsPage::fullscreenToggled,
             this, [this](bool fs) {
                 if (fs) showFullScreen(); else showNormal();
+                showMainMenu();
             });
 }
 
@@ -100,4 +102,13 @@ void MainWindow::showSettingsPage() { m_stack->setCurrentWidget(m_settings); }
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     QMainWindow::closeEvent(event);
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape && isFullScreen()) {
+        showNormal();
+        return;
+    }
+    QMainWindow::keyPressEvent(event);
 }
