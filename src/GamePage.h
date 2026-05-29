@@ -28,6 +28,7 @@ signals:
     void backToMenu();
     void openBackpack();
     void openGameMenu();
+    void autoSaveTriggered();
 
 private slots:
     void onActionClicked(const Action &action);

@@ -96,6 +96,25 @@ void MainWindow::setupUI()
             this, &MainWindow::showBackpackPage);
     connect(m_game, &GamePage::openGameMenu,
             this, &MainWindow::showGameMenuPage);
+    connect(m_game, &GamePage::autoSaveTriggered, this, [this]() {
+        SaveEntry entry;
+        entry.name = QStringLiteral("auto");
+        entry.day = m_game->gameTime().day();
+        entry.hour = m_game->gameTime().hour();
+        entry.minute = m_game->gameTime().minute();
+        entry.hp = m_game->stats().hp();
+        entry.hunger = m_game->stats().hunger();
+        entry.thirst = m_game->stats().thirst();
+        entry.sanity = m_game->stats().sanity();
+        entry.timestamp = QDateTime::currentDateTime();
+        entry.isAuto = true;
+        auto *inv = m_game->inventory();
+        for (int i = 0; i < inv->count(); ++i) {
+            const Item *item = inv->itemAt(i);
+            if (item) entry.items.push_back(*item);
+        }
+        m_saveSystem->saveEntry(QStringLiteral("auto"), entry);
+    });
     connect(m_backpack, &BackpackPage::closed,
             this, &MainWindow::showGamePage);
     connect(m_backpack, &BackpackPage::itemUsed,

@@ -228,16 +228,14 @@ QPushButton *GamePage::createActionButton(const Action &action)
 
 void GamePage::onActionClicked(const Action &action)
 {
-    // Check conditions
     if (!checkConditions(action)) return;
 
-    // Apply costs
-    m_stats.applyChanges(action.costs());
+    int oldDay = m_time.day();
+    int oldHour = m_time.hour();
 
-    // Apply guaranteed yields
+    m_stats.applyChanges(action.costs());
     m_stats.applyChanges(action.yields());
 
-    // Roll loot
     auto *rng = QRandomGenerator::global();
     for (const auto &entry : action.loot()) {
         if (rng->bounded(100) < entry.probability) {
@@ -247,6 +245,12 @@ void GamePage::onActionClicked(const Action &action)
 
     m_time.advance(action.timeCostMinutes());
     refreshStats();
+
+    // Auto-save when crossing 6:00 each day
+    if ((oldDay < m_time.day()) ||
+        (oldDay == m_time.day() && oldHour < 6 && m_time.hour() >= 6)) {
+        emit autoSaveTriggered();
+    }
 }
 
 void GamePage::onBackpackClicked() { emit openBackpack(); }
