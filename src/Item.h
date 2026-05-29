@@ -3,7 +3,7 @@
 
 #include <QString>
 #include <vector>
-#include "Action.h"
+#include "StatChange.h"
 
 class Item
 {

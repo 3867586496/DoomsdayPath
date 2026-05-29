@@ -2,7 +2,9 @@
 
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QMessageBox>
 #include <QPushButton>
+#include <QRandomGenerator>
 #include <QVBoxLayout>
 
 GamePage::GamePage(QWidget *parent)
@@ -107,21 +109,72 @@ void GamePage::setupUI()
     refreshStats();
 }
 
+double GamePage::statValue(StatChange::Target t) const
+{
+    switch (t) {
+    case StatChange::Hp:      return m_stats.hp();
+    case StatChange::Hunger:  return m_stats.hunger();
+    case StatChange::Thirst:  return m_stats.thirst();
+    case StatChange::Sanity:  return m_stats.sanity();
+    }
+    return 0;
+}
+
+bool GamePage::checkConditions(const Action &action)
+{
+    for (const auto &cond : action.conditions()) {
+        double current = statValue(cond.target);
+        if (current < cond.amount) {
+            QMessageBox::warning(this,
+                QStringLiteral("无法执行"),
+                QStringLiteral("当前%1不足（需要 ≥%2，当前 %3）")
+                    .arg(Action::targetName(cond.target))
+                    .arg(cond.amount, 0, 'f', 0)
+                    .arg(current, 0, 'f', 0));
+            return false;
+        }
+    }
+    // Also check: won't kill the player
+    for (const auto &cost : action.costs()) {
+        double current = statValue(cost.target);
+        if (current + cost.amount < 0) {
+            QMessageBox::warning(this,
+                QStringLiteral("无法执行"),
+                QStringLiteral("当前%1不足").arg(Action::targetName(cost.target)));
+            return false;
+        }
+    }
+    return true;
+}
+
 void GamePage::setupTestActions()
 {
     std::vector<Action> testActions = {
         Action(QStringLiteral("搜索"),
-            "搜索废墟中的物资",
-            {{StatChange::Hunger, -10}, {StatChange::Thirst, -5}},
-            {{StatChange::Hunger, 15}, {StatChange::Thirst, 10}}, 30),
+            QStringLiteral("搜索废墟中的物资"),
+            {{StatChange::Hunger, -10}, {StatChange::Thirst, -10},
+             {StatChange::Sanity, -10}},
+            {}, // yields are now probabilistic loot
+            30, // minutes
+            {}, // conditions
+            {
+                {Item(QStringLiteral("木板"), "一块厚实的木板", 0.5), 100},
+                {Item(QStringLiteral("木板"), "一块厚实的木板", 0.5), 50},
+                {Item(QStringLiteral("面包"), "一块干硬的面包", 0.1,
+                 {{StatChange::Hunger, 10}, {StatChange::Thirst, -5}}, true), 80},
+            }),
         Action(QStringLiteral("休息"),
-            "在角落休息片刻",
+            QStringLiteral("在角落休息片刻"),
             {{StatChange::Hunger, -5}, {StatChange::Thirst, -3}},
-            {{StatChange::Hp, 10}, {StatChange::Sanity, 5}}, 60),
+            {{StatChange::Hp, 10}, {StatChange::Sanity, 5}},
+            60),
         Action(QStringLiteral("跋涉"),
-            "向前推进一段距离",
+            QStringLiteral("向前推进一段距离"),
             {{StatChange::Hunger, -15}, {StatChange::Thirst, -20},
-             {StatChange::Sanity, -5}}, {}, 45),
+             {StatChange::Sanity, -5}},
+            {},
+            45,
+            {{StatChange::Hunger, 1}}) // 饥饿值不为0才能跋涉
     };
 
     for (const auto &action : testActions) {
@@ -132,7 +185,6 @@ void GamePage::setupTestActions()
 
 void GamePage::setupTestItems()
 {
-    // Design-specified test items
     m_inventory->addItem(Item(QStringLiteral("面包"),
         "一块干硬的面包", 0.1,
         {{StatChange::Hunger, 10}, {StatChange::Thirst, -5}}, true));
@@ -162,8 +214,23 @@ QPushButton *GamePage::createActionButton(const Action &action)
 
 void GamePage::onActionClicked(const Action &action)
 {
+    // Check conditions
+    if (!checkConditions(action)) return;
+
+    // Apply costs
     m_stats.applyChanges(action.costs());
+
+    // Apply guaranteed yields
     m_stats.applyChanges(action.yields());
+
+    // Roll loot
+    auto *rng = QRandomGenerator::global();
+    for (const auto &entry : action.loot()) {
+        if (rng->bounded(100) < entry.probability) {
+            m_inventory->addItem(entry.item);
+        }
+    }
+
     m_time.advance(action.timeCostMinutes());
     refreshStats();
 }

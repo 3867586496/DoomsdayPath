@@ -30,6 +30,7 @@ qt_add_executable(DoomsdayPath
     src/GameTime.cpp
     src/PlayerStats.h
     src/PlayerStats.cpp
+    src/StatChange.h
     src/Action.h
     src/Action.cpp
     src/Item.h

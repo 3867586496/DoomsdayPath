@@ -37,6 +37,9 @@ private:
     void refreshStats();
     QPushButton *createActionButton(const Action &action);
 
+    double statValue(StatChange::Target t) const;
+    bool checkConditions(const Action &action);
+
     PlayerStats m_stats;
     GameTime m_time;
     Inventory *m_inventory = nullptr;

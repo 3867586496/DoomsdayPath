@@ -3,8 +3,7 @@
 
 #include <QString>
 #include <vector>
-
-struct StatChange;
+#include "StatChange.h"
 
 class PlayerStats
 {

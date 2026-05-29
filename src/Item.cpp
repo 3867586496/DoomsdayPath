@@ -1,4 +1,5 @@
 #include "Item.h"
+#include "Action.h"
 #include <QStringList>
 
 Item::Item(const QString &name, const QString &description,

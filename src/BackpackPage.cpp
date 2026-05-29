@@ -1,4 +1,5 @@
 #include "BackpackPage.h"
+#include "Action.h"
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
@@ -38,14 +39,15 @@ void BackpackPage::setupUI() {
     m_table->verticalHeader()->setVisible(false);
     m_table->setShowGrid(false);
     m_table->setAlternatingRowColors(true);
-    m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
     m_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     m_table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
-    m_table->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    m_table->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
+    m_table->horizontalHeader()->resizeSection(0, 160);
     m_table->setStyleSheet(QStringLiteral(
         "QTableWidget{background-color:#1a1a2e;border:1px solid #0f3460;"
         "gridline-color:#0f3460;color:#e0e0e0;font-size:15px}"
-        "QTableWidget::item{padding:6px 12px}"
+        "QTableWidget::item{padding:8px 12px}"
         "QTableWidget::item:alternate{background-color:#162040}"
         "QHeaderView::section{background-color:#0f3460;color:#a0a0b0;"
         "font-size:14px;font-weight:bold;padding:6px 12px;"
