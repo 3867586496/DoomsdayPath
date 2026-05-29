@@ -4,6 +4,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QSpinBox>
 #include <QVBoxLayout>
 
 SettingsPage::SettingsPage(QWidget *parent) : QWidget(parent) { setupUI(); }
@@ -20,11 +21,18 @@ void SettingsPage::setupUI()
     ml->addWidget(title);
     ml->addSpacing(30);
 
-    // Resolution row
+    const QString labelStyle = QStringLiteral(
+        "QLabel{color:#e0e0e0;font-size:18px}");
+    const QString spinStyle = QStringLiteral(
+        "QSpinBox{background-color:#16213e;color:#e0e0e0;"
+        "border:1px solid #0f3460;border-radius:4px;"
+        "font-size:16px;padding:6px 12px;min-width:80px}"
+        "QSpinBox:hover{border-color:#e94560}");
+
+    // Row 1: Resolution
     QHBoxLayout *resLayout = new QHBoxLayout();
     QLabel *resLabel = new QLabel(QStringLiteral("分辨率"), this);
-    resLabel->setStyleSheet(QStringLiteral(
-        "QLabel{color:#e0e0e0;font-size:18px}"));
+    resLabel->setStyleSheet(labelStyle);
     resLayout->addWidget(resLabel);
     resLayout->addStretch();
 
@@ -33,7 +41,7 @@ void SettingsPage::setupUI()
     m_resolutionCombo->addItem(QStringLiteral("1366x768"));
     m_resolutionCombo->addItem(QStringLiteral("1600x900"));
     m_resolutionCombo->addItem(QStringLiteral("1920x1080"));
-    m_resolutionCombo->setCurrentIndex(1); // Default 1366x768
+    m_resolutionCombo->setCurrentIndex(1);
     m_resolutionCombo->setStyleSheet(QStringLiteral(
         "QComboBox{background-color:#16213e;color:#e0e0e0;"
         "border:1px solid #0f3460;border-radius:4px;"
@@ -45,11 +53,10 @@ void SettingsPage::setupUI()
     ml->addLayout(resLayout);
     ml->addSpacing(16);
 
-    // Fullscreen row
+    // Row 2: Fullscreen
     QHBoxLayout *fsLayout = new QHBoxLayout();
     QLabel *fsLabel = new QLabel(QStringLiteral("全屏"), this);
-    fsLabel->setStyleSheet(QStringLiteral(
-        "QLabel{color:#e0e0e0;font-size:18px}"));
+    fsLabel->setStyleSheet(labelStyle);
     fsLayout->addWidget(fsLabel);
     fsLayout->addStretch();
 
@@ -63,6 +70,47 @@ void SettingsPage::setupUI()
         "border-color:#e94560}"));
     fsLayout->addWidget(m_fullscreenCheck);
     ml->addLayout(fsLayout);
+    ml->addSpacing(24);
+
+    // Separator
+    QLabel *sep = new QLabel(this);
+    sep->setFixedHeight(2);
+    sep->setStyleSheet(QStringLiteral(
+        "QLabel{background-color:#0f3460}"));
+    ml->addWidget(sep);
+    ml->addSpacing(16);
+
+    // Row 3: Auto-save interval
+    QHBoxLayout *asiLayout = new QHBoxLayout();
+    QLabel *asiLabel = new QLabel(QStringLiteral("自动保存间隔(天)"), this);
+    asiLabel->setStyleSheet(labelStyle);
+    asiLayout->addWidget(asiLabel);
+    asiLayout->addStretch();
+
+    m_autoSaveIntervalBox = new QSpinBox(this);
+    m_autoSaveIntervalBox->setRange(0, 30);
+    m_autoSaveIntervalBox->setValue(1);
+    m_autoSaveIntervalBox->setSuffix(QStringLiteral(" 天"));
+    m_autoSaveIntervalBox->setSpecialValueText(QStringLiteral("关闭"));
+    m_autoSaveIntervalBox->setStyleSheet(spinStyle);
+    asiLayout->addWidget(m_autoSaveIntervalBox);
+    ml->addLayout(asiLayout);
+    ml->addSpacing(12);
+
+    // Row 4: Auto-save count
+    QHBoxLayout *ascLayout = new QHBoxLayout();
+    QLabel *ascLabel = new QLabel(QStringLiteral("自动存档个数"), this);
+    ascLabel->setStyleSheet(labelStyle);
+    ascLayout->addWidget(ascLabel);
+    ascLayout->addStretch();
+
+    m_autoSaveCountBox = new QSpinBox(this);
+    m_autoSaveCountBox->setRange(1, 20);
+    m_autoSaveCountBox->setValue(5);
+    m_autoSaveCountBox->setSuffix(QStringLiteral(" 个"));
+    m_autoSaveCountBox->setStyleSheet(spinStyle);
+    ascLayout->addWidget(m_autoSaveCountBox);
+    ml->addLayout(ascLayout);
     ml->addStretch();
 
     // Buttons
@@ -93,6 +141,26 @@ void SettingsPage::setupUI()
     ml->addLayout(btnLayout);
 }
 
+int SettingsPage::autoSaveInterval() const
+{
+    return m_autoSaveIntervalBox ? m_autoSaveIntervalBox->value() : 1;
+}
+
+int SettingsPage::autoSaveCount() const
+{
+    return m_autoSaveCountBox ? m_autoSaveCountBox->value() : 5;
+}
+
+void SettingsPage::setAutoSaveInterval(int days)
+{
+    if (m_autoSaveIntervalBox) m_autoSaveIntervalBox->setValue(days);
+}
+
+void SettingsPage::setAutoSaveCount(int count)
+{
+    if (m_autoSaveCountBox) m_autoSaveCountBox->setValue(count);
+}
+
 void SettingsPage::applySettings()
 {
     QString res = m_resolutionCombo->currentText();
@@ -103,4 +171,7 @@ void SettingsPage::applySettings()
         emit resolutionChanged(w, h);
     }
     emit fullscreenToggled(m_fullscreenCheck->isChecked());
+    emit autoSaveSettingsChanged(
+        m_autoSaveIntervalBox->value(),
+        m_autoSaveCountBox->value());
 }
