@@ -61,7 +61,7 @@ void MainWindow::setupUI()
     // ---- 游戏页 ----
     connect(m_game, &GamePage::backToMenu, this, &MainWindow::showMainMenu);
     connect(m_game, &GamePage::openBackpack, this, &MainWindow::showBackpackPage);
-    connect(m_backpack, &BackpackPage::closed, this, &MainWindow::showMainMenu);
+    connect(m_backpack, &BackpackPage::closed, this, &MainWindow::showGamePage);
     connect(m_backpack, &BackpackPage::itemUsed, m_game, &GamePage::applyItemEffects);
 }
 

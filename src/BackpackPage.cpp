@@ -76,5 +76,5 @@ void BackpackPage::onUseItem(int row) {
     std::vector<StatChange> effects = item->effects();
     m_inventory->removeItem(row);
     emit itemUsed(effects);
-    emit closed();
+    // Item consumed, inventory refreshes automatically via changed() signal
 }
