@@ -9,6 +9,7 @@ class QKeyEvent;
 class MainMenuPage;
 class NewGamePage;
 class LoadingPage;
+class LoadGamePage;
 class GamePage;
 class BackpackPage;
 class SettingsPage;
@@ -43,6 +44,7 @@ private:
     MainMenuPage *m_mainMenu = nullptr;
     NewGamePage *m_newGame = nullptr;
     LoadingPage *m_loading = nullptr;
+    LoadGamePage *m_loadGame = nullptr;
     GamePage *m_game = nullptr;
     BackpackPage *m_backpack = nullptr;
     SettingsPage *m_settings = nullptr;

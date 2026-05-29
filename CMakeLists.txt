@@ -22,6 +22,8 @@ qt_add_executable(DoomsdayPath
     src/NewGamePage.cpp
     src/LoadingPage.h
     src/LoadingPage.cpp
+    src/LoadGamePage.h
+    src/LoadGamePage.cpp
     src/GamePage.h
     src/GamePage.cpp
     src/DifficultyFactor.h

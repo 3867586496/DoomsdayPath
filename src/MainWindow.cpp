@@ -2,6 +2,7 @@
 #include "MainMenuPage.h"
 #include "NewGamePage.h"
 #include "LoadingPage.h"
+#include "LoadGamePage.h"
 #include "GamePage.h"
 #include "BackpackPage.h"
 #include "SettingsPage.h"
@@ -44,6 +45,7 @@ void MainWindow::setupUI()
     m_mainMenu = new MainMenuPage(this);
     m_newGame = new NewGamePage(this);
     m_loading = new LoadingPage(this);
+    m_loadGame = new LoadGamePage(m_saveSystem, this);
     m_game = new GamePage(this);
     m_backpack = new BackpackPage(this);
     m_settings = new SettingsPage(this);
@@ -52,17 +54,30 @@ void MainWindow::setupUI()
 
     m_stack->addWidget(m_mainMenu);   // 0
     m_stack->addWidget(m_newGame);     // 1
-    m_stack->addWidget(m_loading);     // 2
+    m_stack->addWidget(m_loadGame);    // 2
     m_stack->addWidget(m_game);        // 3
     m_stack->addWidget(m_backpack);    // 4
     m_stack->addWidget(m_settings);    // 5
     m_stack->addWidget(m_gameMenu);    // 6
+    m_stack->addWidget(m_loading);     // 7
 
     // ---- 主菜单 ----
     connect(m_mainMenu, &MainMenuPage::startGameClicked,
             this, &MainWindow::showNewGamePage);
     connect(m_mainMenu, &MainMenuPage::loadGameClicked,
             this, &MainWindow::showLoadGamePage);
+    connect(m_loadGame, &LoadGamePage::backClicked,
+            this, &MainWindow::showMainMenu);
+    connect(m_loadGame, &LoadGamePage::loadRequested, this,
+            [this](const QString &folder, int entryIdx) {
+                auto entries = m_saveSystem->entriesInFolder(folder);
+                if (entryIdx < 0 || entryIdx >= static_cast<int>(entries.size()))
+                    return;
+                auto &e = entries[entryIdx];
+                // TODO: actually load game state from SaveEntry
+                // For now, just go to game page
+                showGamePage();
+            });
     connect(m_mainMenu, &MainMenuPage::settingsClicked,
             this, &MainWindow::showSettingsPage);
     connect(m_mainMenu, &MainMenuPage::exitClicked,
@@ -107,7 +122,11 @@ void MainWindow::setupUI()
 }
 
 void MainWindow::showNewGamePage()  { m_stack->setCurrentWidget(m_newGame); }
-void MainWindow::showLoadGamePage(){ m_stack->setCurrentWidget(m_loading); }
+void MainWindow::showLoadGamePage()
+{
+    m_loadGame->refreshList();
+    m_stack->setCurrentWidget(m_loadGame);
+}
 void MainWindow::showMainMenu()     { m_stack->setCurrentWidget(m_mainMenu); }
 void MainWindow::showGamePage()
 {
