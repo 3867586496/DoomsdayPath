@@ -6,6 +6,10 @@
 #include "BackpackPage.h"
 #include "SettingsPage.h"
 #include "GameMenuPage.h"
+#include "SaveSystem.h"
+
+#include <QInputDialog>
+#include <QMessageBox>
 
 #include <QApplication>
 #include <QKeyEvent>
@@ -44,6 +48,7 @@ void MainWindow::setupUI()
     m_backpack = new BackpackPage(this);
     m_settings = new SettingsPage(this);
     m_gameMenu = new GameMenuPage(this);
+    m_saveSystem = new SaveSystem(this);
 
     m_stack->addWidget(m_mainMenu);   // 0
     m_stack->addWidget(m_newGame);     // 1
@@ -95,6 +100,8 @@ void MainWindow::setupUI()
     // ---- 游戏菜单 ----
     connect(m_gameMenu, &GameMenuPage::resumeClicked,
             this, &MainWindow::showGamePage);
+    connect(m_gameMenu, &GameMenuPage::saveClicked,
+            this, &MainWindow::doSave);
     connect(m_gameMenu, &GameMenuPage::exitToMainMenu,
             this, &MainWindow::showMainMenu);
 }
@@ -123,4 +130,45 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         return;
     }
     QMainWindow::keyPressEvent(event);
+}
+
+void MainWindow::doSave()
+{
+    // Prompt for save folder name
+    bool ok;
+    QString folderName = QInputDialog::getText(
+        this, QStringLiteral("保存"),
+        QStringLiteral("存档名称:"),
+        QLineEdit::Normal,
+        QStringLiteral("存档1"), &ok);
+    if (!ok || folderName.isEmpty()) return;
+
+    // Build save entry from current game state
+    SaveEntry entry;
+    entry.name = folderName;
+    entry.day = m_game->gameTime().day();
+    entry.hour = m_game->gameTime().hour();
+    entry.minute = m_game->gameTime().minute();
+    entry.hp = m_game->stats().hp();
+    entry.hunger = m_game->stats().hunger();
+    entry.thirst = m_game->stats().thirst();
+    entry.sanity = m_game->stats().sanity();
+    entry.timestamp = QDateTime::currentDateTime();
+    entry.isAuto = false;
+
+    // Copy inventory items
+    auto *inv = m_game->inventory();
+    for (int i = 0; i < inv->count(); ++i) {
+        const Item *item = inv->itemAt(i);
+        if (item) entry.items.push_back(*item);
+    }
+
+    if (m_saveSystem->saveEntry(folderName, entry)) {
+        QMessageBox::information(this, QStringLiteral("保存成功"),
+            QStringLiteral("存档已保存"));
+        showMainMenu();
+    } else {
+        QMessageBox::warning(this, QStringLiteral("保存失败"),
+            QStringLiteral("无法保存存档"));
+    }
 }

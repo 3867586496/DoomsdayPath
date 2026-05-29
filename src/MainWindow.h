@@ -13,6 +13,7 @@ class GamePage;
 class BackpackPage;
 class SettingsPage;
 class GameMenuPage;
+class SaveSystem;
 
 class MainWindow : public QMainWindow
 {
@@ -46,6 +47,9 @@ private:
     BackpackPage *m_backpack = nullptr;
     SettingsPage *m_settings = nullptr;
     GameMenuPage *m_gameMenu = nullptr;
+    SaveSystem *m_saveSystem = nullptr;
+
+    void doSave();
 };
 
 #endif // MAINWINDOW_H

@@ -19,6 +19,8 @@ class GamePage : public QWidget
 public:
     explicit GamePage(QWidget *parent = nullptr);
     Inventory *inventory() { return m_inventory; }
+    const PlayerStats &stats() const { return m_stats; }
+    const GameTime &gameTime() const { return m_time; }
 public slots:
     void applyItemEffects(const std::vector<StatChange> &effects);
 
