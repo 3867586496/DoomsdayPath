@@ -12,14 +12,12 @@ void BackpackPage::setupUI() {
     QVBoxLayout *ml = new QVBoxLayout(this);
     ml->setContentsMargins(20, 16, 20, 16);
 
-    // Title
-    QLabel *tl = new QLabel(QStringLiteral("Backpack"), this);
+    QLabel *tl = new QLabel(QStringLiteral("背包"), this);
     tl->setAlignment(Qt::AlignCenter);
     tl->setStyleSheet(QStringLiteral(
         "QLabel{color:#e94560;font-size:28px;font-weight:bold;padding:8px}"));
     ml->addWidget(tl);
 
-    // Weight display
     m_weightLabel = new QLabel(this);
     m_weightLabel->setAlignment(Qt::AlignCenter);
     m_weightLabel->setStyleSheet(QStringLiteral(
@@ -27,13 +25,12 @@ void BackpackPage::setupUI() {
     ml->addWidget(m_weightLabel);
     ml->addSpacing(8);
 
-    // Table: Name | Qty | Function | Action
     m_table = new QTableWidget(0, 4, this);
     m_table->setHorizontalHeaderLabels({
-        QStringLiteral("Name"),
-        QStringLiteral("Qty"),
-        QStringLiteral("Function"),
-        QStringLiteral("Action")
+        QStringLiteral("名称"),
+        QStringLiteral("数量"),
+        QStringLiteral("功能"),
+        QStringLiteral("操作")
     });
     m_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -56,10 +53,9 @@ void BackpackPage::setupUI() {
     ml->addWidget(m_table);
     ml->addSpacing(16);
 
-    // Close button
     QHBoxLayout *bl = new QHBoxLayout();
     bl->addStretch();
-    m_btnClose = new QPushButton(QStringLiteral("Close Backpack"), this);
+    m_btnClose = new QPushButton(QStringLiteral("关闭背包"), this);
     m_btnClose->setStyleSheet(QStringLiteral(
         "QPushButton{background-color:#16213e;color:#e0e0e0;"
         "border:2px solid #0f3460;border-radius:8px;"
@@ -84,19 +80,15 @@ void BackpackPage::setInventory(Inventory *inv) {
 
 void BackpackPage::refresh() {
     if (!m_inventory) {
-        m_weightLabel->setText(QStringLiteral("Weight: -/-"));
+        m_weightLabel->setText(QStringLiteral("负重: -/-"));
         m_table->setRowCount(0);
         return;
     }
-    m_weightLabel->setText(QStringLiteral("Weight: %1 / %2")
+    m_weightLabel->setText(QStringLiteral("负重: %1 / %2")
         .arg(m_inventory->currentWeight(), 0, 'f', 1)
         .arg(m_inventory->capacity(), 0, 'f', 1));
 
-    // Group items by name for quantity display
-    struct Row {
-        int firstIdx;
-        int qty;
-    };
+    struct Row { int firstIdx; int qty; };
     std::vector<Row> rows;
     for (int i = 0; i < m_inventory->count(); ++i) {
         const Item *item = m_inventory->itemAt(i);
@@ -105,9 +97,7 @@ void BackpackPage::refresh() {
         for (auto &r : rows) {
             const Item *first = m_inventory->itemAt(r.firstIdx);
             if (first && first->name() == item->name()) {
-                r.qty++;
-                found = true;
-                break;
+                r.qty++; found = true; break;
             }
         }
         if (!found) rows.push_back({i, 1});
@@ -130,29 +120,26 @@ void BackpackPage::refresh() {
         if (!item) continue;
         int firstIdx = rows[row].firstIdx;
 
-        // Col 0: Name
         QLabel *nl = new QLabel(item->name());
         nl->setStyleSheet(cellStyle);
         m_table->setCellWidget(row, 0, nl);
 
-        // Col 1: Quantity
         QLabel *ql = new QLabel(QString::number(rows[row].qty));
         ql->setAlignment(Qt::AlignCenter);
         ql->setStyleSheet(cellStyle);
         m_table->setCellWidget(row, 1, ql);
 
-        // Col 2: Function description
         QString funcDesc;
         if (!item->effects().empty()) {
             QStringList parts;
             for (const auto &e : item->effects()) {
-                QString sign = e.amount >= 0 ? QStringLiteral("+") : QString();
+                QString sign = e.amount >= 0 ? "+" : "";
                 parts.append(QStringLiteral("%1%2%3")
                     .arg(Action::targetName(e.target))
                     .arg(sign)
                     .arg(e.amount, 0, 'f', 0));
             }
-            funcDesc = parts.join(QStringLiteral(", "));
+            funcDesc = parts.join(", ");
         } else {
             funcDesc = QStringLiteral("-");
         }
@@ -160,14 +147,13 @@ void BackpackPage::refresh() {
         fl->setStyleSheet(cellStyle);
         m_table->setCellWidget(row, 2, fl);
 
-        // Col 3: Action buttons
         QWidget *aw = new QWidget();
         QHBoxLayout *al = new QHBoxLayout(aw);
         al->setContentsMargins(4, 2, 4, 2);
         al->setSpacing(6);
 
         if (item->isEdible()) {
-            QPushButton *be = new QPushButton(QStringLiteral("Eat"));
+            QPushButton *be = new QPushButton(QStringLiteral("食用"));
             be->setStyleSheet(btnStyle);
             be->setCursor(Qt::PointingHandCursor);
             connect(be, &QPushButton::clicked, this,
@@ -175,7 +161,7 @@ void BackpackPage::refresh() {
             al->addWidget(be);
         }
 
-        QPushButton *bd = new QPushButton(QStringLiteral("Discard"));
+        QPushButton *bd = new QPushButton(QStringLiteral("丢弃"));
         bd->setStyleSheet(btnStyle);
         bd->setCursor(Qt::PointingHandCursor);
         connect(bd, &QPushButton::clicked, this,
