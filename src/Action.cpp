@@ -15,10 +15,10 @@ Action::Action(const QString &name, const QString &desc,
 QString Action::targetName(StatChange::Target t)
 {
     switch (t) {
-    case StatChange::Hp:      return QStringLiteral("鐢熷懡");
-    case StatChange::Hunger:  return QStringLiteral("楗ラタ");
-    case StatChange::Thirst:  return QStringLiteral("鍙ｆ复");
-    case StatChange::Sanity:  return QStringLiteral("鐞嗘櫤");
+    case StatChange::Hp:      return QStringLiteral("HP");
+    case StatChange::Hunger:  return QStringLiteral("Hunger");
+    case StatChange::Thirst:  return QStringLiteral("Thirst");
+    case StatChange::Sanity:  return QStringLiteral("Sanity");
     }
     return {};
 }
