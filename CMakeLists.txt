@@ -45,8 +45,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Gui
 )
 
-
-
 if(ANDROID)
     set(CMAKE_ANDROID_API 24)
     set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android" CACHE STRING "")

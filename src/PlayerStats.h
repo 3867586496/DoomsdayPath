@@ -2,6 +2,9 @@
 #define PLAYERSTATS_H
 
 #include <QString>
+#include <vector>
+
+struct StatChange;
 
 class PlayerStats
 {
@@ -19,6 +22,8 @@ public:
     void modifyHunger(double delta);
     void modifyThirst(double delta);
     void modifySanity(double delta);
+
+    void applyChanges(const std::vector<StatChange> &changes);
 
     QString hpString() const;
     QString hungerString() const;

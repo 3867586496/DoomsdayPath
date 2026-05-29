@@ -1,4 +1,5 @@
 #include "Item.h"
+#include <QStringList>
 
 Item::Item(const QString &name, const QString &description,
            double weight, const std::vector<StatChange> &effects,

@@ -1,4 +1,5 @@
 #include "PlayerStats.h"
+#include "Action.h"
 
 #include <algorithm>
 
@@ -19,6 +20,18 @@ void PlayerStats::modifyHp(double delta)       { m_hp = clamp(m_hp + delta); }
 void PlayerStats::modifyHunger(double delta)   { m_hunger = clamp(m_hunger + delta); }
 void PlayerStats::modifyThirst(double delta)   { m_thirst = clamp(m_thirst + delta); }
 void PlayerStats::modifySanity(double delta)   { m_sanity = clamp(m_sanity + delta); }
+
+void PlayerStats::applyChanges(const std::vector<StatChange> &changes)
+{
+    for (const auto &c : changes) {
+        switch (c.target) {
+        case StatChange::Hp:      modifyHp(c.amount); break;
+        case StatChange::Hunger:  modifyHunger(c.amount); break;
+        case StatChange::Thirst:  modifyThirst(c.amount); break;
+        case StatChange::Sanity:  modifySanity(c.amount); break;
+        }
+    }
+}
 
 QString PlayerStats::hpString() const
 {

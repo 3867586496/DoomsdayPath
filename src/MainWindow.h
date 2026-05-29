@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 class QStackedWidget;
+class QCloseEvent;
 class MainMenuPage;
 class NewGamePage;
 class LoadingPage;
@@ -17,6 +18,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override = default;
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
 
 private slots:
     void showNewGamePage();

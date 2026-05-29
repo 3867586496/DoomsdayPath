@@ -6,8 +6,10 @@
 #include "BackpackPage.h"
 
 #include <QApplication>
+#include <QCloseEvent>
 #include <QScreen>
 #include <QStackedWidget>
+#include <cstdlib>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -17,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::setupUI()
 {
-    setWindowTitle(QStringLiteral("末日迷途"));
+    setWindowTitle(QStringLiteral("Doomsday Path"));
     resize(800, 600);
 
     QScreen *screen = QApplication::primaryScreen();
@@ -50,7 +52,7 @@ void MainWindow::setupUI()
     // ---- 主菜单 ----
     connect(m_mainMenu, &MainMenuPage::startGameClicked, this, &MainWindow::showNewGamePage);
     connect(m_mainMenu, &MainMenuPage::loadGameClicked, this, &MainWindow::showLoadGamePage);
-    connect(m_mainMenu, &MainMenuPage::exitClicked, this, &QMainWindow::close);
+    connect(m_mainMenu, &MainMenuPage::exitClicked, this, []() { std::_Exit(0); });
 
     // ---- 开始游戏页 ----
     connect(m_newGame, &NewGamePage::backClicked, this, &MainWindow::showMainMenu);
@@ -74,3 +76,9 @@ void MainWindow::showGamePage()
     m_stack->setCurrentWidget(m_game);
 }
 void MainWindow::showBackpackPage() { m_stack->setCurrentWidget(m_backpack); }
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event);
+    std::_Exit(0);
+}

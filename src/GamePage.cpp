@@ -165,22 +165,8 @@ QPushButton *GamePage::createActionButton(const Action &action)
 
 void GamePage::onActionClicked(const Action &action)
 {
-    for (const auto &c : action.costs()) {
-        switch (c.target) {
-        case StatChange::Hp:     m_stats.modifyHp(c.amount); break;
-        case StatChange::Hunger: m_stats.modifyHunger(c.amount); break;
-        case StatChange::Thirst: m_stats.modifyThirst(c.amount); break;
-        case StatChange::Sanity: m_stats.modifySanity(c.amount); break;
-        }
-    }
-    for (const auto &y : action.yields()) {
-        switch (y.target) {
-        case StatChange::Hp:     m_stats.modifyHp(y.amount); break;
-        case StatChange::Hunger: m_stats.modifyHunger(y.amount); break;
-        case StatChange::Thirst: m_stats.modifyThirst(y.amount); break;
-        case StatChange::Sanity: m_stats.modifySanity(y.amount); break;
-        }
-    }
+    m_stats.applyChanges(action.costs());
+    m_stats.applyChanges(action.yields());
     m_time.advance(action.timeCostMinutes());
     refreshStats();
 }
@@ -189,14 +175,7 @@ void GamePage::onBackpackClicked() { emit openBackpack(); }
 
 void GamePage::applyItemEffects(const std::vector<StatChange> &effects)
 {
-    for (const auto &e : effects) {
-        switch (e.target) {
-        case StatChange::Hp:     m_stats.modifyHp(e.amount); break;
-        case StatChange::Hunger: m_stats.modifyHunger(e.amount); break;
-        case StatChange::Thirst: m_stats.modifyThirst(e.amount); break;
-        case StatChange::Sanity: m_stats.modifySanity(e.amount); break;
-        }
-    }
+    m_stats.applyChanges(effects);
     refreshStats();
 }
 
