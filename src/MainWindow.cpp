@@ -5,6 +5,7 @@
 #include "GamePage.h"
 #include "BackpackPage.h"
 #include "SettingsPage.h"
+#include "GameMenuPage.h"
 
 #include <QApplication>
 #include <QKeyEvent>
@@ -42,6 +43,7 @@ void MainWindow::setupUI()
     m_game = new GamePage(this);
     m_backpack = new BackpackPage(this);
     m_settings = new SettingsPage(this);
+    m_gameMenu = new GameMenuPage(this);
 
     m_stack->addWidget(m_mainMenu);   // 0
     m_stack->addWidget(m_newGame);     // 1
@@ -49,6 +51,7 @@ void MainWindow::setupUI()
     m_stack->addWidget(m_game);        // 3
     m_stack->addWidget(m_backpack);    // 4
     m_stack->addWidget(m_settings);    // 5
+    m_stack->addWidget(m_gameMenu);    // 6
 
     // ---- 主菜单 ----
     connect(m_mainMenu, &MainMenuPage::startGameClicked,
@@ -71,6 +74,8 @@ void MainWindow::setupUI()
             this, &MainWindow::showMainMenu);
     connect(m_game, &GamePage::openBackpack,
             this, &MainWindow::showBackpackPage);
+    connect(m_game, &GamePage::openGameMenu,
+            this, &MainWindow::showGameMenuPage);
     connect(m_backpack, &BackpackPage::closed,
             this, &MainWindow::showGamePage);
     connect(m_backpack, &BackpackPage::itemUsed,
@@ -86,6 +91,12 @@ void MainWindow::setupUI()
                 if (fs) showFullScreen(); else showNormal();
                 showMainMenu();
             });
+
+    // ---- 游戏菜单 ----
+    connect(m_gameMenu, &GameMenuPage::resumeClicked,
+            this, &MainWindow::showGamePage);
+    connect(m_gameMenu, &GameMenuPage::exitToMainMenu,
+            this, &MainWindow::showMainMenu);
 }
 
 void MainWindow::showNewGamePage()  { m_stack->setCurrentWidget(m_newGame); }
@@ -98,6 +109,7 @@ void MainWindow::showGamePage()
 }
 void MainWindow::showBackpackPage() { m_stack->setCurrentWidget(m_backpack); }
 void MainWindow::showSettingsPage() { m_stack->setCurrentWidget(m_settings); }
+void MainWindow::showGameMenuPage() { m_stack->setCurrentWidget(m_gameMenu); }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {

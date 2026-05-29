@@ -25,6 +25,7 @@ public slots:
 signals:
     void backToMenu();
     void openBackpack();
+    void openGameMenu();
 
 private slots:
     void onActionClicked(const Action &action);

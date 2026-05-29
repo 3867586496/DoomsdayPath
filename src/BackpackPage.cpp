@@ -13,7 +13,7 @@ void BackpackPage::setupUI() {
     QVBoxLayout *ml = new QVBoxLayout(this);
     ml->setContentsMargins(20, 16, 20, 16);
 
-    QLabel *tl = new QLabel(QStringLiteral("背包"), this);
+    QLabel *tl = new QLabel(QStringLiteral("鑳屽寘"), this);
     tl->setAlignment(Qt::AlignCenter);
     tl->setStyleSheet(QStringLiteral(
         "QLabel{color:#e94560;font-size:28px;font-weight:bold;padding:8px}"));
@@ -28,10 +28,10 @@ void BackpackPage::setupUI() {
 
     m_table = new QTableWidget(0, 4, this);
     m_table->setHorizontalHeaderLabels({
-        QStringLiteral("名称"),
-        QStringLiteral("数量"),
-        QStringLiteral("功能"),
-        QStringLiteral("操作")
+        QStringLiteral("鍚嶇О"),
+        QStringLiteral("鏁伴噺"),
+        QStringLiteral("鍔熻兘"),
+        QStringLiteral("鎿嶄綔")
     });
     m_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -47,7 +47,7 @@ void BackpackPage::setupUI() {
     m_table->setStyleSheet(QStringLiteral(
         "QTableWidget{background-color:#1a1a2e;border:1px solid #0f3460;"
         "gridline-color:#0f3460;color:#e0e0e0;font-size:15px}"
-        "QTableWidget::item{padding:8px 12px}"
+        "QTableWidget::item{padding:10px 12px}"
         "QTableWidget::item:alternate{background-color:#162040}"
         "QHeaderView::section{background-color:#0f3460;color:#a0a0b0;"
         "font-size:14px;font-weight:bold;padding:6px 12px;"
@@ -57,7 +57,7 @@ void BackpackPage::setupUI() {
 
     QHBoxLayout *bl = new QHBoxLayout();
     bl->addStretch();
-    m_btnClose = new QPushButton(QStringLiteral("关闭背包"), this);
+    m_btnClose = new QPushButton(QStringLiteral("鍏抽棴鑳屽寘"), this);
     m_btnClose->setStyleSheet(QStringLiteral(
         "QPushButton{background-color:#16213e;color:#e0e0e0;"
         "border:2px solid #0f3460;border-radius:8px;"
@@ -82,11 +82,11 @@ void BackpackPage::setInventory(Inventory *inv) {
 
 void BackpackPage::refresh() {
     if (!m_inventory) {
-        m_weightLabel->setText(QStringLiteral("负重: -/-"));
+        m_weightLabel->setText(QStringLiteral("璐熼噸: -/-"));
         m_table->setRowCount(0);
         return;
     }
-    m_weightLabel->setText(QStringLiteral("负重: %1 / %2")
+    m_weightLabel->setText(QStringLiteral("璐熼噸: %1 / %2")
         .arg(m_inventory->currentWeight(), 0, 'f', 1)
         .arg(m_inventory->capacity(), 0, 'f', 1));
 
@@ -155,7 +155,7 @@ void BackpackPage::refresh() {
         al->setSpacing(6);
 
         if (item->isEdible()) {
-            QPushButton *be = new QPushButton(QStringLiteral("食用"));
+            QPushButton *be = new QPushButton(QStringLiteral("椋熺敤"));
             be->setStyleSheet(btnStyle);
             be->setCursor(Qt::PointingHandCursor);
             connect(be, &QPushButton::clicked, this,
@@ -163,7 +163,7 @@ void BackpackPage::refresh() {
             al->addWidget(be);
         }
 
-        QPushButton *bd = new QPushButton(QStringLiteral("丢弃"));
+        QPushButton *bd = new QPushButton(QStringLiteral("涓㈠純"));
         bd->setStyleSheet(btnStyle);
         bd->setCursor(Qt::PointingHandCursor);
         connect(bd, &QPushButton::clicked, this,

@@ -3,15 +3,16 @@
 
 #include <QMainWindow>
 
+class QStackedWidget;
 class QCloseEvent;
 class QKeyEvent;
-class QStackedWidget;
 class MainMenuPage;
 class NewGamePage;
 class LoadingPage;
 class GamePage;
 class BackpackPage;
 class SettingsPage;
+class GameMenuPage;
 
 class MainWindow : public QMainWindow
 {
@@ -32,6 +33,7 @@ private slots:
     void showGamePage();
     void showBackpackPage();
     void showSettingsPage();
+    void showGameMenuPage();
 
 private:
     void setupUI();
@@ -43,6 +45,7 @@ private:
     GamePage *m_game = nullptr;
     BackpackPage *m_backpack = nullptr;
     SettingsPage *m_settings = nullptr;
+    GameMenuPage *m_gameMenu = nullptr;
 };
 
 #endif // MAINWINDOW_H

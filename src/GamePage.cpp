@@ -104,6 +104,20 @@ void GamePage::setupUI()
     btnBack->setCursor(Qt::PointingHandCursor);
     connect(btnBack, &QPushButton::clicked, this, &GamePage::backToMenu);
     bottomLayout->addWidget(btnBack);
+
+    // 游戏菜单按钮 (右下角)
+    QPushButton *btnMenu = new QPushButton(
+        QStringLiteral("菜单"), this);
+    btnMenu->setStyleSheet(QStringLiteral(
+        "QPushButton { background-color: #16213e; color: #e0e0e0;"
+        " border: 2px solid #0f3460; border-radius: 8px;"
+        " font-size: 16px; padding: 8px 24px; }"
+        "QPushButton:hover { background-color: #0f3460;"
+        " border-color: #e94560; }"));
+    btnMenu->setCursor(Qt::PointingHandCursor);
+    connect(btnMenu, &QPushButton::clicked, this, &GamePage::openGameMenu);
+    bottomLayout->addWidget(btnMenu);
+
     mainLayout->addLayout(bottomLayout);
 
     refreshStats();
