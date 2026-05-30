@@ -186,12 +186,14 @@ void LoadGamePage::onShowDetails(const QString &folderName)
     });
     dt->setEditTriggers(QAbstractItemView::NoEditTriggers);
     dt->verticalHeader()->setVisible(false);
-    dt->verticalHeader()->setDefaultSectionSize(40);
-    dt->setShowGrid(false);
-    dt->setAlternatingRowColors(true);
-    dt->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    dt->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    dt->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    dt->verticalHeader()->setDefaultSectionSize(48);
+    dt->setShowGrid(true);
+    dt->setAlternatingRowColors(false);
+    dt->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
+    dt->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Interactive);
+    dt->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    dt->horizontalHeader()->resizeSection(0, 160);
+    dt->horizontalHeader()->resizeSection(1, 140);
     dt->setStyleSheet(QStringLiteral(
         "QTableWidget{background-color:#1a1a2e;border:1px solid #0f3460;"
         "gridline-color:#0f3460;color:#e0e0e0;font-size:14px}"
@@ -246,7 +248,7 @@ void LoadGamePage::onShowDetails(const QString &folderName)
         al->addWidget(bdel);
 
         dt->setCellWidget(i, 2, aw);
-        dt->setRowHeight(i, 40);
+        dt->setRowHeight(i, 48);
     }
     dl->addWidget(dt);
 
