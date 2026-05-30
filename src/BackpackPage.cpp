@@ -17,7 +17,7 @@ void BackpackPage::setCanUseCallback(std::function<bool(const std::vector<StatCh
 
 void BackpackPage::setupUI() {
     QVBoxLayout *ml = new QVBoxLayout(this);
-    ml->setContentsMargins(20, 16, 20, 16);
+    ml->setContentsMargins(10, 12, 10, 12);
 
     QLabel *tl = new QLabel(QStringLiteral("背包"), this);
     tl->setAlignment(Qt::AlignCenter);
@@ -43,15 +43,15 @@ void BackpackPage::setupUI() {
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
     m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_table->verticalHeader()->setVisible(false);
-    m_table->verticalHeader()->setDefaultSectionSize(56);
+    m_table->verticalHeader()->setDefaultSectionSize(48);
     m_table->setShowGrid(false);
     m_table->setAlternatingRowColors(true);
-    m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
-    m_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    m_table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Interactive);
-    m_table->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
-    m_table->horizontalHeader()->resizeSection(0, 120);
-    m_table->horizontalHeader()->resizeSection(2, 200);
+    m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    m_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
+    m_table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    m_table->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
+    m_table->horizontalHeader()->resizeSection(1, 50);
+    m_table->horizontalHeader()->resizeSection(3, 160);
     m_table->setStyleSheet(QStringLiteral(
         "QTableWidget{background-color:#1a1a2e;border:1px solid #0f3460;"
         "gridline-color:#0f3460;color:#e0e0e0;font-size:15px}"
@@ -117,11 +117,11 @@ void BackpackPage::refresh() {
     m_table->setRowCount(static_cast<int>(rows.size()));
 
     QString cellStyle = QStringLiteral(
-        "QLabel{color:#e0e0e0;font-size:15px;padding:4px 8px}");
+        "QLabel{color:#e0e0e0;font-size:14px;padding:2px 6px}");
     QString btnStyle = QStringLiteral(
         "QPushButton{background-color:#16213e;color:#c0c0d0;"
         "border:1px solid #0f3460;border-radius:4px;"
-        "font-size:13px;padding:4px 10px;min-height:28px}"
+        "font-size:12px;padding:3px 8px;min-height:24px}"
         "QPushButton:hover{background-color:#1a2744;"
         "border-color:#e94560;color:#fff}");
 
@@ -161,8 +161,8 @@ void BackpackPage::refresh() {
 
         QWidget *aw = new QWidget();
         QHBoxLayout *al = new QHBoxLayout(aw);
-        al->setContentsMargins(4, 4, 4, 4);
-        al->setSpacing(6);
+        al->setContentsMargins(2, 2, 2, 2);
+        al->setSpacing(4);
 
         if (item->isEdible()) {
             QPushButton *be = new QPushButton(QStringLiteral("食用"));
@@ -181,7 +181,7 @@ void BackpackPage::refresh() {
         al->addWidget(bd);
 
         m_table->setCellWidget(row, 3, aw);
-        m_table->setRowHeight(row, 56);
+        m_table->setRowHeight(row, 48);
     }
 }
 
