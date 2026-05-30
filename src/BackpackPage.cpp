@@ -43,7 +43,7 @@ void BackpackPage::setupUI() {
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
     m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_table->verticalHeader()->setVisible(false);
-    m_table->verticalHeader()->setDefaultSectionSize(64);
+    m_table->verticalHeader()->setDefaultSectionSize(56);
     m_table->setShowGrid(false);
     m_table->setAlternatingRowColors(true);
     m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
@@ -51,7 +51,7 @@ void BackpackPage::setupUI() {
     m_table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Interactive);
     m_table->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
     m_table->horizontalHeader()->resizeSection(0, 120);
-    m_table->horizontalHeader()->resizeSection(2, 140);
+    m_table->horizontalHeader()->resizeSection(2, 200);
     m_table->setStyleSheet(QStringLiteral(
         "QTableWidget{background-color:#1a1a2e;border:1px solid #0f3460;"
         "gridline-color:#0f3460;color:#e0e0e0;font-size:15px}"
@@ -121,7 +121,7 @@ void BackpackPage::refresh() {
     QString btnStyle = QStringLiteral(
         "QPushButton{background-color:#16213e;color:#c0c0d0;"
         "border:1px solid #0f3460;border-radius:4px;"
-        "font-size:14px;padding:8px 16px;min-height:38px}"
+        "font-size:13px;padding:4px 10px;min-height:28px}"
         "QPushButton:hover{background-color:#1a2744;"
         "border-color:#e94560;color:#fff}");
 
@@ -161,8 +161,8 @@ void BackpackPage::refresh() {
 
         QWidget *aw = new QWidget();
         QHBoxLayout *al = new QHBoxLayout(aw);
-        al->setContentsMargins(4, 8, 4, 8);
-        al->setSpacing(10);
+        al->setContentsMargins(4, 4, 4, 4);
+        al->setSpacing(6);
 
         if (item->isEdible()) {
             QPushButton *be = new QPushButton(QStringLiteral("食用"));
@@ -181,7 +181,7 @@ void BackpackPage::refresh() {
         al->addWidget(bd);
 
         m_table->setCellWidget(row, 3, aw);
-        m_table->setRowHeight(row, 64);
+        m_table->setRowHeight(row, 56);
     }
 }
 
