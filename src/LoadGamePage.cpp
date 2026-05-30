@@ -1,6 +1,7 @@
 #include "LoadGamePage.h"
 #include "SaveSystem.h"
 
+#include <QDialog>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
@@ -38,6 +39,7 @@ void LoadGamePage::setupUI()
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
     m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_table->verticalHeader()->setVisible(false);
+    m_table->verticalHeader()->setDefaultSectionSize(44);
     m_table->setShowGrid(false);
     m_table->setAlternatingRowColors(true);
     m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -49,7 +51,7 @@ void LoadGamePage::setupUI()
         "QTableWidget::item{padding:10px 12px}"
         "QTableWidget::item:alternate{background-color:#162040}"
         "QHeaderView::section{background-color:#0f3460;color:#a0a0b0;"
-        "font-size:14px;font-weight:bold;padding:6px 12px;"
+        "font-size:14px;font-weight:bold;padding:8px 12px;"
         "border:none;border-bottom:2px solid #1a1a2e}"));
     ml->addWidget(m_table);
     ml->addSpacing(16);
@@ -77,6 +79,7 @@ void LoadGamePage::refreshList()
     m_table->setRowCount(folders.size());
     for (int i = 0; i < folders.size(); ++i) {
         populateFolderRow(i, folders[i]);
+        m_table->setRowHeight(i, 44);
     }
 }
 
@@ -88,16 +91,14 @@ void LoadGamePage::populateFolderRow(int row, const QString &folderName)
     QString btnStyle = QStringLiteral(
         "QPushButton{background-color:#16213e;color:#c0c0d0;"
         "border:1px solid #0f3460;border-radius:4px;"
-        "font-size:13px;padding:3px 12px}"
+        "font-size:13px;padding:3px 12px;min-height:30px}"
         "QPushButton:hover{background-color:#1a2744;"
         "border-color:#e94560;color:#fff}");
 
-    // Col 0: Name
     QLabel *nl = new QLabel(folderName);
     nl->setStyleSheet(cellStyle);
     m_table->setCellWidget(row, 0, nl);
 
-    // Col 1: Last save time
     QString timeStr = latest.timestamp.isValid()
         ? latest.timestamp.toString("MM-dd HH:mm")
         : QStringLiteral("-");
@@ -105,17 +106,16 @@ void LoadGamePage::populateFolderRow(int row, const QString &folderName)
     tl->setStyleSheet(cellStyle);
     m_table->setCellWidget(row, 1, tl);
 
-    // Col 2: Action buttons
     QWidget *aw = new QWidget();
     QHBoxLayout *al = new QHBoxLayout(aw);
-    al->setContentsMargins(4, 2, 4, 2);
+    al->setContentsMargins(4, 4, 4, 4);
     al->setSpacing(6);
 
     QPushButton *btnLoad = new QPushButton(QStringLiteral("加载"));
     btnLoad->setStyleSheet(QStringLiteral(
         "QPushButton{background-color:#e94560;color:#fff;"
         "border:1px solid #e94560;border-radius:4px;"
-        "font-size:13px;padding:3px 12px}"
+        "font-size:13px;padding:3px 12px;min-height:30px}"
         "QPushButton:hover{background-color:#ff6b81}"));
     btnLoad->setCursor(Qt::PointingHandCursor);
     connect(btnLoad, &QPushButton::clicked, this,
@@ -152,10 +152,8 @@ void LoadGamePage::onDeleteFolder(const QString &folderName)
 
 void LoadGamePage::onLoadFolder(const QString &folderName)
 {
-    // Load the latest entry in this folder
     auto entries = m_saveSystem->entriesInFolder(folderName);
     if (entries.empty()) return;
-    // Find latest
     int latestIdx = 0;
     for (int i = 1; i < static_cast<int>(entries.size()); ++i) {
         if (entries[i].timestamp > entries[latestIdx].timestamp)
@@ -166,7 +164,6 @@ void LoadGamePage::onLoadFolder(const QString &folderName)
 
 void LoadGamePage::onShowDetails(const QString &folderName)
 {
-    // Show entries in folder as a popup
     auto entries = m_saveSystem->entriesInFolder(folderName);
     if (entries.empty()) {
         QMessageBox::information(this, QStringLiteral("详情"),
@@ -187,6 +184,7 @@ void LoadGamePage::onShowDetails(const QString &folderName)
     });
     dt->setEditTriggers(QAbstractItemView::NoEditTriggers);
     dt->verticalHeader()->setVisible(false);
+    dt->verticalHeader()->setDefaultSectionSize(40);
     dt->setShowGrid(false);
     dt->setAlternatingRowColors(true);
     dt->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -205,7 +203,7 @@ void LoadGamePage::onShowDetails(const QString &folderName)
     QString btnStyle = QStringLiteral(
         "QPushButton{background-color:#16213e;color:#c0c0d0;"
         "border:1px solid #0f3460;border-radius:4px;"
-        "font-size:12px;padding:2px 10px}"
+        "font-size:12px;padding:3px 10px;min-height:28px}"
         "QPushButton:hover{background-color:#e94560;color:#fff}");
 
     for (int i = 0; i < static_cast<int>(entries.size()); ++i) {
@@ -242,11 +240,11 @@ void LoadGamePage::onShowDetails(const QString &folderName)
                 QStringLiteral("删除此记录？"));
             if (r == QMessageBox::Yes)
                 m_saveSystem->deleteEntry(folderName, idx);
-            // QDialog will close/reopen on refresh
         });
         al->addWidget(bdel);
 
         dt->setCellWidget(i, 2, aw);
+        dt->setRowHeight(i, 40);
     }
     dl->addWidget(dt);
 
