@@ -43,7 +43,7 @@ void BackpackPage::setupUI() {
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
     m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_table->verticalHeader()->setVisible(false);
-    m_table->verticalHeader()->setDefaultSectionSize(52);
+    m_table->verticalHeader()->setDefaultSectionSize(64);
     m_table->setShowGrid(false);
     m_table->setAlternatingRowColors(true);
     m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
@@ -161,6 +161,7 @@ void BackpackPage::refresh() {
         m_table->setCellWidget(row, 2, fl);
 
         QWidget *aw = new QWidget();
+        aw->setMinimumHeight(48);
         QHBoxLayout *al = new QHBoxLayout(aw);
         al->setContentsMargins(4, 4, 4, 4);
         al->setSpacing(8);
@@ -182,7 +183,7 @@ void BackpackPage::refresh() {
         al->addWidget(bd);
 
         m_table->setCellWidget(row, 3, aw);
-        m_table->setRowHeight(row, 52);
+        m_table->setRowHeight(row, 64);
     }
 }
 
