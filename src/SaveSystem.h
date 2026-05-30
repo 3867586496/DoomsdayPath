@@ -20,6 +20,7 @@ struct SaveEntry
     double hunger = 100;
     double thirst = 100;
     double sanity = 100;
+    double rest = 100;
     double difficultyFactor = 1.0;
     std::vector<Item> items;
     QDateTime timestamp;

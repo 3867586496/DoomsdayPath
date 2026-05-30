@@ -37,7 +37,7 @@ void SavePage::setupUI()
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
     m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_table->verticalHeader()->setVisible(false);
-    m_table->verticalHeader()->setDefaultSectionSize(56);
+    m_table->verticalHeader()->setDefaultSectionSize(64);
     m_table->setShowGrid(true);
     m_table->setAlternatingRowColors(true);
     m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
@@ -115,8 +115,9 @@ void SavePage::populateRow(int row, const QString &folderName)
         "border-color:#e94560;color:#fff}");
 
     QWidget *aw = new QWidget();
+    aw->setMinimumHeight(48);
     QHBoxLayout *al = new QHBoxLayout(aw);
-    al->setContentsMargins(4, 4, 4, 4);
+    al->setContentsMargins(4, 8, 4, 8);
     al->setSpacing(8);
     al->addStretch();
 
@@ -135,7 +136,7 @@ void SavePage::populateRow(int row, const QString &folderName)
     al->addWidget(btnDel);
 
     m_table->setCellWidget(row, 2, aw);
-    m_table->setRowHeight(row, 56);
+    m_table->setRowHeight(row, 64);
 }
 
 void SavePage::onNewSave()

@@ -25,6 +25,7 @@ QString Action::targetName(StatChange::Target t)
     case StatChange::Hunger:  return QStringLiteral("饥饿");
     case StatChange::Thirst:  return QStringLiteral("口渴");
     case StatChange::Sanity:  return QStringLiteral("理智");
+    case StatChange::Rest:    return QStringLiteral("休息");
     }
     return {};
 }

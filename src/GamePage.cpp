@@ -23,10 +23,10 @@ void GamePage::setupUI()
 
     QHBoxLayout *topBar = new QHBoxLayout();
     QVBoxLayout *statsLayout = new QVBoxLayout();
-    statsLayout->setSpacing(4);
+    statsLayout->setSpacing(2);
 
     const QString statStyle = QStringLiteral(
-        "QLabel { color: #e0e0e0; font-size: 18px; padding: 2px 0; }");
+        "QLabel { color: #e0e0e0; font-size: 16px; padding: 1px 0; }");
 
     m_hpLabel = new QLabel(this);
     m_hpLabel->setStyleSheet(statStyle);
@@ -40,6 +40,9 @@ void GamePage::setupUI()
     m_sanityLabel = new QLabel(this);
     m_sanityLabel->setStyleSheet(statStyle);
     statsLayout->addWidget(m_sanityLabel);
+    m_restLabel = new QLabel(this);
+    m_restLabel->setStyleSheet(statStyle);
+    statsLayout->addWidget(m_restLabel);
 
     topBar->addLayout(statsLayout);
     topBar->addStretch();
@@ -105,7 +108,6 @@ void GamePage::setupUI()
     connect(btnBack, &QPushButton::clicked, this, &GamePage::backToMenu);
     bottomLayout->addWidget(btnBack);
 
-    // 游戏菜单按钮 (右下角)
     QPushButton *btnMenu = new QPushButton(
         QStringLiteral("菜单"), this);
     btnMenu->setStyleSheet(QStringLiteral(
@@ -130,6 +132,7 @@ double GamePage::statValue(StatChange::Target t) const
     case StatChange::Hunger:  return m_stats.hunger();
     case StatChange::Thirst:  return m_stats.thirst();
     case StatChange::Sanity:  return m_stats.sanity();
+    case StatChange::Rest:    return m_stats.rest();
     }
     return 0;
 }
@@ -148,7 +151,6 @@ bool GamePage::checkConditions(const Action &action)
             return false;
         }
     }
-    // Also check: won't kill the player
     for (const auto &cost : action.costs()) {
         double current = statValue(cost.target);
         if (current + cost.amount < 0) {
@@ -161,6 +163,16 @@ bool GamePage::checkConditions(const Action &action)
     return true;
 }
 
+void GamePage::processHourlyTicks(int minutesPassed)
+{
+    if (m_time.hour() < 0) {  // GameTime starts at hour 6 day 1, no tick yet
+        // Only process ticks after actions actually advance time
+    }
+    int hours = minutesPassed / 60;
+    for (int i = 0; i < hours; ++i)
+        m_stats.applyHourlyTick();
+}
+
 void GamePage::setupTestActions()
 {
     std::vector<Action> testActions = {
@@ -168,9 +180,9 @@ void GamePage::setupTestActions()
             QStringLiteral("搜索废墟中的物资"),
             {{StatChange::Hunger, -10}, {StatChange::Thirst, -10},
              {StatChange::Sanity, -10}},
-            {}, // yields are now probabilistic loot
-            30, // minutes
-            {}, // conditions
+            {},
+            30,
+            {},
             {
                 {Item(QStringLiteral("木板"), "一块厚实的木板", 0.5), 100},
                 {Item(QStringLiteral("木板"), "一块厚实的木板", 0.5), 50},
@@ -187,13 +199,19 @@ void GamePage::setupTestActions()
             {{StatChange::Hunger, -5}, {StatChange::Thirst, -3}},
             {{StatChange::Hp, 10}, {StatChange::Sanity, 5}},
             60),
+        Action(QStringLiteral("睡觉"),
+            QStringLiteral("好好睡一觉"),
+            {},
+            {{StatChange::Rest, 80}},
+            480,
+            {{StatChange::Hunger, 1}}),
         Action(QStringLiteral("跋涉"),
             QStringLiteral("向前推进一段距离"),
             {{StatChange::Hunger, -15}, {StatChange::Thirst, -20},
              {StatChange::Sanity, -5}},
             {},
             45,
-            {{StatChange::Hunger, 1}}) // 饥饿值不为0才能跋涉
+            {{StatChange::Hunger, 1}})
     };
 
     for (const auto &action : testActions) {
@@ -238,6 +256,9 @@ void GamePage::onActionClicked(const Action &action)
     int oldDay = m_time.day();
     int oldHour = m_time.hour();
 
+    // Process hourly ticks BEFORE applying costs (the time is about to advance)
+    processHourlyTicks(action.timeCostMinutes());
+
     m_stats.applyChanges(action.costs());
     m_stats.applyChanges(action.yields());
 
@@ -251,7 +272,6 @@ void GamePage::onActionClicked(const Action &action)
     m_time.advance(action.timeCostMinutes());
     refreshStats();
 
-    // Auto-save when crossing 6:00 each day
     if ((oldDay < m_time.day()) ||
         (oldDay == m_time.day() && oldHour < 6 && m_time.hour() >= 6)) {
         emit autoSaveTriggered();
@@ -272,5 +292,6 @@ void GamePage::refreshStats()
     m_hungerLabel->setText(m_stats.hungerString());
     m_thirstLabel->setText(m_stats.thirstString());
     m_sanityLabel->setText(m_stats.sanityString());
+    m_restLabel->setText(m_stats.restString());
     m_timeLabel->setText(m_time.displayString());
 }

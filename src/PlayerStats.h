@@ -16,18 +16,22 @@ public:
     double hunger() const { return m_hunger; }
     double thirst() const { return m_thirst; }
     double sanity() const { return m_sanity; }
+    double rest() const { return m_rest; }
 
     void modifyHp(double delta);
     void modifyHunger(double delta);
     void modifyThirst(double delta);
     void modifySanity(double delta);
+    void modifyRest(double delta);
 
     void applyChanges(const std::vector<StatChange> &changes);
+    void applyHourlyTick();
 
     QString hpString() const;
     QString hungerString() const;
     QString thirstString() const;
     QString sanityString() const;
+    QString restString() const;
 
 private:
     static double clamp(double value);
@@ -36,6 +40,7 @@ private:
     double m_hunger;
     double m_thirst;
     double m_sanity;
+    double m_rest;
 };
 
 #endif // PLAYERSTATS_H

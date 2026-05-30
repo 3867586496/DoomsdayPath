@@ -3,7 +3,7 @@
 
 struct StatChange
 {
-    enum Target { Hp, Hunger, Thirst, Sanity };
+    enum Target { Hp, Hunger, Thirst, Sanity, Rest };
     Target target;
     double amount; // 正值=获得，负值=消耗
 };

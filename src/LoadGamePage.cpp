@@ -39,8 +39,8 @@ void LoadGamePage::setupUI()
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
     m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_table->verticalHeader()->setVisible(false);
-    m_table->verticalHeader()->setDefaultSectionSize(56);
-    m_table->setShowGrid(false);
+    m_table->verticalHeader()->setDefaultSectionSize(64);
+    m_table->setShowGrid(true);
     m_table->setAlternatingRowColors(true);
     m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     m_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
@@ -79,7 +79,7 @@ void LoadGamePage::refreshList()
     m_table->setRowCount(folders.size());
     for (int i = 0; i < folders.size(); ++i) {
         populateFolderRow(i, folders[i]);
-        m_table->setRowHeight(i, 56);
+        m_table->setRowHeight(i, 64);
     }
 }
 
@@ -91,7 +91,7 @@ void LoadGamePage::populateFolderRow(int row, const QString &folderName)
     QString btnStyle = QStringLiteral(
         "QPushButton{background-color:#16213e;color:#c0c0d0;"
         "border:1px solid #0f3460;border-radius:4px;"
-        "font-size:13px;padding:3px 12px;min-height:30px}"
+        "font-size:13px;padding:4px 12px;min-height:28px}"
         "QPushButton:hover{background-color:#1a2744;"
         "border-color:#e94560;color:#fff}");
 
@@ -108,8 +108,8 @@ void LoadGamePage::populateFolderRow(int row, const QString &folderName)
 
     QWidget *aw = new QWidget();
     QHBoxLayout *al = new QHBoxLayout(aw);
-    al->setContentsMargins(4, 4, 4, 4);
-    al->setSpacing(6);
+    al->setContentsMargins(4, 8, 4, 8);
+    al->setSpacing(8);
 
     QPushButton *btnLoad = new QPushButton(QStringLiteral("加载"));
     btnLoad->setStyleSheet(QStringLiteral(

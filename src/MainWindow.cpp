@@ -167,6 +167,7 @@ void MainWindow::showGamePage()
             case StatChange::Hunger:  current = m_game->stats().hunger(); break;
             case StatChange::Thirst:  current = m_game->stats().thirst(); break;
             case StatChange::Sanity:  current = m_game->stats().sanity(); break;
+            case StatChange::Rest:    current = m_game->stats().rest(); break;
             }
             if (current + e.amount < 0) return false;
         }
@@ -209,6 +210,7 @@ void MainWindow::doSave(const QString &folderName)
     entry.hunger = m_game->stats().hunger();
     entry.thirst = m_game->stats().thirst();
     entry.sanity = m_game->stats().sanity();
+    entry.rest = m_game->stats().rest();
     entry.timestamp = QDateTime::currentDateTime();
     entry.isAuto = false;
 

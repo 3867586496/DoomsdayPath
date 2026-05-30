@@ -43,6 +43,7 @@ private:
 
     double statValue(StatChange::Target t) const;
     bool checkConditions(const Action &action);
+    void processHourlyTicks(int minutesPassed);
 
     PlayerStats m_stats;
     GameTime m_time;
@@ -52,6 +53,7 @@ private:
     QLabel *m_hungerLabel = nullptr;
     QLabel *m_thirstLabel = nullptr;
     QLabel *m_sanityLabel = nullptr;
+    QLabel *m_restLabel = nullptr;
     QLabel *m_timeLabel = nullptr;
 
     QVBoxLayout *m_actionLayout = nullptr;

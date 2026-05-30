@@ -19,6 +19,7 @@ QJsonObject SaveEntry::toJson() const
     obj["hunger"] = hunger;
     obj["thirst"] = thirst;
     obj["sanity"] = sanity;
+    obj["rest"] = rest;
     obj["difficultyFactor"] = difficultyFactor;
     obj["isAuto"] = isAuto;
     obj["timestamp"] = timestamp.toString(Qt::ISODate);
@@ -55,6 +56,7 @@ SaveEntry SaveEntry::fromJson(const QJsonObject &obj)
     e.hunger = obj["hunger"].toDouble(100);
     e.thirst = obj["thirst"].toDouble(100);
     e.sanity = obj["sanity"].toDouble(100);
+    e.rest = obj["rest"].toDouble(100);
     e.difficultyFactor = obj["difficultyFactor"].toDouble(1.0);
     e.isAuto = obj["isAuto"].toBool(false);
     e.timestamp = QDateTime::fromString(obj["timestamp"].toString(), Qt::ISODate);
