@@ -44,7 +44,7 @@ void BackpackPage::setupUI() {
     m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_table->verticalHeader()->setVisible(false);
     m_table->verticalHeader()->setDefaultSectionSize(64);
-    m_table->setShowGrid(false);
+    m_table->setShowGrid(true);
     m_table->setAlternatingRowColors(true);
     m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
     m_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
