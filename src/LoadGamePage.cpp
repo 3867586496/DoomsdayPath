@@ -39,7 +39,7 @@ void LoadGamePage::setupUI()
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
     m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_table->verticalHeader()->setVisible(false);
-    m_table->verticalHeader()->setDefaultSectionSize(44);
+    m_table->verticalHeader()->setDefaultSectionSize(56);
     m_table->setShowGrid(false);
     m_table->setAlternatingRowColors(true);
     m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -79,7 +79,7 @@ void LoadGamePage::refreshList()
     m_table->setRowCount(folders.size());
     for (int i = 0; i < folders.size(); ++i) {
         populateFolderRow(i, folders[i]);
-        m_table->setRowHeight(i, 44);
+        m_table->setRowHeight(i, 56);
     }
 }
 
