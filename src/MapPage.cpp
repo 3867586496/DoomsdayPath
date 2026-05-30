@@ -163,8 +163,6 @@ QWidget *MapPage::createTileWidget(int mapX, int mapY)
         connect(btn, &QPushButton::clicked, this, [this, mapX, mapY]() {
             int dx = mapX - m_map->playerX();
             int dy = mapY - m_map->playerY();
-            emit tileEntered(mapX, mapY, m_map->moveCostBetween(
-                m_map->playerX(), m_map->playerY(), mapX, mapY));
             tryMove(dx, dy);
         });
     }
@@ -174,7 +172,11 @@ QWidget *MapPage::createTileWidget(int mapX, int mapY)
 
 void MapPage::tryMove(int dx, int dy)
 {
+    int nx = m_map->playerX() + dx;
+    int ny = m_map->playerY() + dy;
+    int cost = m_map->moveCostBetween(m_map->playerX(), m_map->playerY(), nx, ny);
     if (m_map->movePlayer(dx, dy)) {
+        emit tileEntered(nx, ny, cost);
         refreshGrid();
     }
 }
