@@ -2,6 +2,7 @@
 #define BACKPACKPAGE_H
 
 #include <QWidget>
+#include <functional>
 #include "Inventory.h"
 
 class QLabel;
@@ -16,6 +17,7 @@ public:
     explicit BackpackPage(QWidget *parent = nullptr);
 
     void setInventory(Inventory *inventory);
+    void setCanUseCallback(std::function<bool(const std::vector<StatChange>&)> cb);
 
 signals:
     void closed();
@@ -30,6 +32,7 @@ private:
     void setupUI();
 
     Inventory *m_inventory = nullptr;
+    std::function<bool(const std::vector<StatChange>&)> m_canUseItem;
 
     QLabel *m_weightLabel = nullptr;
     QTableWidget *m_table = nullptr;

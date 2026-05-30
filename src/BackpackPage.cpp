@@ -3,11 +3,17 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QTableWidget>
 #include <QVBoxLayout>
 
 BackpackPage::BackpackPage(QWidget *parent) : QWidget(parent) { setupUI(); }
+
+void BackpackPage::setCanUseCallback(std::function<bool(const std::vector<StatChange>&)> cb)
+{
+    m_canUseItem = std::move(cb);
+}
 
 void BackpackPage::setupUI() {
     QVBoxLayout *ml = new QVBoxLayout(this);
@@ -37,18 +43,19 @@ void BackpackPage::setupUI() {
     m_table->setSelectionMode(QAbstractItemView::SingleSelection);
     m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_table->verticalHeader()->setVisible(false);
-    m_table->verticalHeader()->setDefaultSectionSize(44);
+    m_table->verticalHeader()->setDefaultSectionSize(52);
     m_table->setShowGrid(false);
     m_table->setAlternatingRowColors(true);
     m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
     m_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    m_table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    m_table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Interactive);
     m_table->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
-    m_table->horizontalHeader()->resizeSection(0, 160);
+    m_table->horizontalHeader()->resizeSection(0, 120);
+    m_table->horizontalHeader()->resizeSection(2, 140);
     m_table->setStyleSheet(QStringLiteral(
         "QTableWidget{background-color:#1a1a2e;border:1px solid #0f3460;"
         "gridline-color:#0f3460;color:#e0e0e0;font-size:15px}"
-        "QTableWidget::item{padding:10px 12px}"
+        "QTableWidget::item{padding:12px 10px}"
         "QTableWidget::item:alternate{background-color:#162040}"
         "QHeaderView::section{background-color:#0f3460;color:#a0a0b0;"
         "font-size:14px;font-weight:bold;padding:8px 12px;"
@@ -114,7 +121,7 @@ void BackpackPage::refresh() {
     QString btnStyle = QStringLiteral(
         "QPushButton{background-color:#16213e;color:#c0c0d0;"
         "border:1px solid #0f3460;border-radius:4px;"
-        "font-size:13px;padding:4px 14px}"
+        "font-size:13px;padding:5px 14px;min-height:32px}"
         "QPushButton:hover{background-color:#1a2744;"
         "border-color:#e94560;color:#fff}");
 
@@ -125,6 +132,7 @@ void BackpackPage::refresh() {
 
         QLabel *nl = new QLabel(item->name());
         nl->setStyleSheet(cellStyle);
+        nl->setWordWrap(true);
         m_table->setCellWidget(row, 0, nl);
 
         QLabel *ql = new QLabel(QString::number(rows[row].qty));
@@ -148,18 +156,18 @@ void BackpackPage::refresh() {
         }
         QLabel *fl = new QLabel(funcDesc);
         fl->setStyleSheet(cellStyle);
+        fl->setWordWrap(true);
         m_table->setCellWidget(row, 2, fl);
 
         QWidget *aw = new QWidget();
         QHBoxLayout *al = new QHBoxLayout(aw);
-        al->setContentsMargins(4, 4, 4, 4);
+        al->setContentsMargins(6, 6, 6, 6);
         al->setSpacing(8);
 
         if (item->isEdible()) {
             QPushButton *be = new QPushButton(QStringLiteral("食用"));
             be->setStyleSheet(btnStyle);
             be->setCursor(Qt::PointingHandCursor);
-            be->setMinimumHeight(30);
             connect(be, &QPushButton::clicked, this,
                     [this, firstIdx]() { onUseItem(firstIdx); });
             al->addWidget(be);
@@ -168,13 +176,12 @@ void BackpackPage::refresh() {
         QPushButton *bd = new QPushButton(QStringLiteral("丢弃"));
         bd->setStyleSheet(btnStyle);
         bd->setCursor(Qt::PointingHandCursor);
-        bd->setMinimumHeight(30);
         connect(bd, &QPushButton::clicked, this,
                 [this, firstIdx]() { onDiscardItem(firstIdx); });
         al->addWidget(bd);
 
         m_table->setCellWidget(row, 3, aw);
-        m_table->setRowHeight(row, 44);
+        m_table->setRowHeight(row, 52);
     }
 }
 
@@ -186,7 +193,17 @@ void BackpackPage::onUseItem(int row) {
     if (!m_inventory) return;
     const Item *item = m_inventory->itemAt(row);
     if (!item || !item->isEdible()) return;
+
     std::vector<StatChange> effects = item->effects();
+
+    // Check conditions before using
+    if (m_canUseItem && !m_canUseItem(effects)) {
+        QMessageBox::warning(this,
+            QStringLiteral("无法使用"),
+            QStringLiteral("当前状态不满足使用条件"));
+        return;
+    }
+
     m_inventory->removeItem(row);
     emit itemUsed(effects);
 }

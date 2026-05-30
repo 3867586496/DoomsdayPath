@@ -150,6 +150,20 @@ void MainWindow::showMainMenu()     { m_stack->setCurrentWidget(m_mainMenu); }
 void MainWindow::showGamePage()
 {
     m_backpack->setInventory(m_game->inventory());
+    m_backpack->setCanUseCallback([this](const std::vector<StatChange> &effects) -> bool {
+        for (const auto &e : effects) {
+            if (e.amount >= 0) continue;
+            double current = 0;
+            switch (e.target) {
+            case StatChange::Hp:      current = m_game->stats().hp(); break;
+            case StatChange::Hunger:  current = m_game->stats().hunger(); break;
+            case StatChange::Thirst:  current = m_game->stats().thirst(); break;
+            case StatChange::Sanity:  current = m_game->stats().sanity(); break;
+            }
+            if (current + e.amount < 0) return false;
+        }
+        return true;
+    });
     m_stack->setCurrentWidget(m_game);
 }
 void MainWindow::showBackpackPage() { m_stack->setCurrentWidget(m_backpack); }
