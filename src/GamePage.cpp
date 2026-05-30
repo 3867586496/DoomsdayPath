@@ -94,6 +94,24 @@ void GamePage::setupUI()
     mainLayout->addWidget(m_testArea);
 
     QHBoxLayout *bottomLayout = new QHBoxLayout();
+
+    QPushButton *btnBigMap = new QPushButton(QStringLiteral("大地图"), this);
+    btnBigMap->setStyleSheet(QStringLiteral(
+        "QPushButton { background-color: #16213e; color: #e0e0e0;"
+        " border: 2px solid #0f3460; border-radius: 8px;"
+        " font-size: 16px; padding: 8px 24px; }"
+        "QPushButton:hover { background-color: #0f3460;"
+        " border-color: #e94560; }"));
+    btnBigMap->setCursor(Qt::PointingHandCursor);
+    connect(btnBigMap, &QPushButton::clicked, this, &GamePage::openBigMap);
+    bottomLayout->addWidget(btnBigMap);
+
+    QPushButton *btnSmallMap = new QPushButton(QStringLiteral("小地图"), this);
+    btnSmallMap->setStyleSheet(btnBigMap->styleSheet());
+    btnSmallMap->setCursor(Qt::PointingHandCursor);
+    connect(btnSmallMap, &QPushButton::clicked, this, &GamePage::openSmallMap);
+    bottomLayout->addWidget(btnSmallMap);
+
     bottomLayout->addStretch();
 
     QPushButton *btnBack = new QPushButton(

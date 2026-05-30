@@ -8,6 +8,9 @@
 #include "SettingsPage.h"
 #include "GameMenuPage.h"
 #include "SavePage.h"
+#include "MapPage.h"
+#include "SmallMapPage.h"
+#include "WorldMap.h"
 #include "SaveSystem.h"
 
 #include <QMessageBox>
@@ -51,17 +54,22 @@ void MainWindow::setupUI()
     m_gameMenu = new GameMenuPage(this);
     m_saveSystem = new SaveSystem(this);
     m_savePage = new SavePage(m_saveSystem, this);
+    m_worldMap = new WorldMap(this);
+    m_mapPage = new MapPage(m_worldMap, this);
+    m_smallMapPage = new SmallMapPage(m_worldMap, this);
     m_loadGame = new LoadGamePage(m_saveSystem, this);
 
-    m_stack->addWidget(m_mainMenu);   // 0
-    m_stack->addWidget(m_newGame);     // 1
-    m_stack->addWidget(m_loadGame);    // 2
-    m_stack->addWidget(m_game);        // 3
-    m_stack->addWidget(m_backpack);    // 4
-    m_stack->addWidget(m_settings);    // 5
-    m_stack->addWidget(m_gameMenu);    // 6
-    m_stack->addWidget(m_savePage);    // 7
-    m_stack->addWidget(m_loading);     // 8
+    m_stack->addWidget(m_mainMenu);    // 0
+    m_stack->addWidget(m_newGame);      // 1
+    m_stack->addWidget(m_loadGame);     // 2
+    m_stack->addWidget(m_game);         // 3
+    m_stack->addWidget(m_backpack);     // 4
+    m_stack->addWidget(m_settings);     // 5
+    m_stack->addWidget(m_gameMenu);     // 6
+    m_stack->addWidget(m_savePage);     // 7
+    m_stack->addWidget(m_mapPage);      // 8
+    m_stack->addWidget(m_smallMapPage); // 9
+    m_stack->addWidget(m_loading);      // 10
 
     // ---- 主菜单 ----
     connect(m_mainMenu, &MainMenuPage::startGameClicked,
@@ -146,6 +154,24 @@ void MainWindow::setupUI()
             this, &MainWindow::showGameMenuPage);
     connect(m_savePage, &SavePage::saveRequested, this,
             [this](const QString &folderName) { doSave(folderName); });
+
+    // ---- 地图页 ----
+    connect(m_mapPage, &MapPage::returnToGame,
+            this, &MainWindow::showGamePage);
+    connect(m_mapPage, &MapPage::tileEntered, this,
+            [this](int, int, int cost) {
+                m_game->advanceTime(cost);
+            });
+
+    // ---- 小地图页 ----
+    connect(m_smallMapPage, &SmallMapPage::returnToGame,
+            this, &MainWindow::showGamePage);
+
+    // ---- 游戏页扩展 ----
+    connect(m_game, &GamePage::openBigMap,
+            this, &MainWindow::showMapPage);
+    connect(m_game, &GamePage::openSmallMap,
+            this, &MainWindow::showSmallMapPage);
 }
 
 void MainWindow::showNewGamePage()  { m_stack->setCurrentWidget(m_newGame); }
@@ -182,6 +208,15 @@ void MainWindow::showSavePage()
 {
     m_savePage->refreshList();
     m_stack->setCurrentWidget(m_savePage);
+}
+void MainWindow::showMapPage()
+{
+    m_stack->setCurrentWidget(m_mapPage);
+}
+void MainWindow::showSmallMapPage()
+{
+    m_smallMapPage->refresh();
+    m_stack->setCurrentWidget(m_smallMapPage);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

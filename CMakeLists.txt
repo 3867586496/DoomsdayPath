@@ -49,6 +49,13 @@ qt_add_executable(DoomsdayPath
     src/SaveSystem.cpp
     src/SavePage.h
     src/SavePage.cpp
+    src/MapTile.h
+    src/WorldMap.h
+    src/WorldMap.cpp
+    src/MapPage.h
+    src/MapPage.cpp
+    src/SmallMapPage.h
+    src/SmallMapPage.cpp
 )
 
 target_link_libraries(DoomsdayPath PRIVATE Qt6::Core Qt6::Widgets Qt6::Gui)

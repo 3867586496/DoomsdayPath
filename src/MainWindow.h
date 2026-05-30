@@ -15,6 +15,9 @@ class BackpackPage;
 class SettingsPage;
 class GameMenuPage;
 class SavePage;
+class MapPage;
+class SmallMapPage;
+class WorldMap;
 class SaveSystem;
 
 class MainWindow : public QMainWindow
@@ -38,6 +41,8 @@ private slots:
     void showSettingsPage();
     void showGameMenuPage();
     void showSavePage();
+    void showMapPage();
+    void showSmallMapPage();
 
 private:
     void setupUI();
@@ -52,6 +57,9 @@ private:
     SettingsPage *m_settings = nullptr;
     GameMenuPage *m_gameMenu = nullptr;
     SavePage *m_savePage = nullptr;
+    MapPage *m_mapPage = nullptr;
+    SmallMapPage *m_smallMapPage = nullptr;
+    WorldMap *m_worldMap = nullptr;
     SaveSystem *m_saveSystem = nullptr;
 
     void doSave(const QString &folderName);

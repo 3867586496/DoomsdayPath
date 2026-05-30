@@ -21,6 +21,11 @@ public:
     Inventory *inventory() { return m_inventory; }
     const PlayerStats &stats() const { return m_stats; }
     const GameTime &gameTime() const { return m_time; }
+    void advanceTime(int minutes) {
+        processHourlyTicks(minutes);
+        m_time.advance(minutes);
+        refreshStats();
+    }
 public slots:
     void applyItemEffects(const std::vector<StatChange> &effects);
 
@@ -28,6 +33,8 @@ signals:
     void backToMenu();
     void openBackpack();
     void openGameMenu();
+    void openBigMap();
+    void openSmallMap();
     void autoSaveTriggered();
 
 private slots:
