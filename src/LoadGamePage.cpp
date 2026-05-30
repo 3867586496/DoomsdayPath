@@ -20,7 +20,7 @@ LoadGamePage::LoadGamePage(SaveSystem *saveSystem, QWidget *parent)
 void LoadGamePage::setupUI()
 {
     QVBoxLayout *ml = new QVBoxLayout(this);
-    ml->setContentsMargins(20, 16, 20, 16);
+    ml->setContentsMargins(12, 12, 12, 12);
 
     QLabel *title = new QLabel(QStringLiteral("加载游戏"), this);
     title->setAlignment(Qt::AlignCenter);
@@ -42,9 +42,11 @@ void LoadGamePage::setupUI()
     m_table->verticalHeader()->setDefaultSectionSize(64);
     m_table->setShowGrid(true);
     m_table->setAlternatingRowColors(true);
-    m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    m_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
-    m_table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
+    m_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Interactive);
+    m_table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    m_table->horizontalHeader()->resizeSection(0, 120);
+    m_table->horizontalHeader()->resizeSection(1, 150);
     m_table->setStyleSheet(QStringLiteral(
         "QTableWidget{background-color:#1a1a2e;border:1px solid #0f3460;"
         "gridline-color:#0f3460;color:#e0e0e0;font-size:15px}"
@@ -115,7 +117,7 @@ void LoadGamePage::populateFolderRow(int row, const QString &folderName)
     btnLoad->setStyleSheet(QStringLiteral(
         "QPushButton{background-color:#e94560;color:#fff;"
         "border:1px solid #e94560;border-radius:4px;"
-        "font-size:13px;padding:3px 12px;min-height:30px}"
+        "font-size:13px;padding:4px 12px;min-height:28px}"
         "QPushButton:hover{background-color:#ff6b81}"));
     btnLoad->setCursor(Qt::PointingHandCursor);
     connect(btnLoad, &QPushButton::clicked, this,

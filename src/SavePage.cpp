@@ -43,8 +43,8 @@ void SavePage::setupUI()
     m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Interactive);
     m_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Interactive);
     m_table->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    m_table->horizontalHeader()->resizeSection(0, 140);
-    m_table->horizontalHeader()->resizeSection(1, 180);
+    m_table->horizontalHeader()->resizeSection(0, 120);
+    m_table->horizontalHeader()->resizeSection(1, 160);
     m_table->setStyleSheet(QStringLiteral(
         "QTableWidget{background-color:#1a1a2e;border:1px solid #0f3460;"
         "gridline-color:#0f3460;color:#e0e0e0;font-size:15px}"
