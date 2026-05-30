@@ -4,15 +4,16 @@
 #include "MapTile.h"
 #include <QObject>
 #include <QRandomGenerator>
-#include <vector>
+#include <map>
+#include <utility>
 
 class WorldMap : public QObject
 {
     Q_OBJECT
 
 public:
-    static constexpr int MapSize = 20;  // total grid is 20x20
-    static constexpr int FogRadius = 1; // 3x3 visible around player
+    static constexpr int FogRadius = 1;     // 3×3 visible around player
+    static constexpr int SpawnRadius = 5;   // initial generation around spawn
 
     explicit WorldMap(QObject *parent = nullptr);
 
@@ -22,17 +23,14 @@ public:
     const MapTile *tileAt(int x, int y) const;
     MapTile *tileAt(int x, int y);
 
-    // Time cost to move from one tile to adjacent tile (in minutes)
+    // Time cost in minutes to move between two adjacent tiles
     int moveCostBetween(int x1, int y1, int x2, int y2) const;
 
-    // Move player: updates fog, returns true if move was valid
+    // Move player: updates fog, returns true if valid
     bool movePlayer(int dx, int dy);
 
-    // Total grid size
-    int size() const { return MapSize; }
-
 public slots:
-    void generateRandom();
+    void generateInitial();
 
 signals:
     void mapChanged();
@@ -40,11 +38,12 @@ signals:
 
 private:
     void updateFog();
-    bool isValidPos(int x, int y) const;
+    MapTile &ensureTile(int x, int y);
 
-    std::vector<std::vector<MapTile>> m_tiles;
-    int m_playerX = MapSize / 2;
-    int m_playerY = MapSize / 2;
+    using Key = std::pair<int, int>;
+    std::map<Key, MapTile> m_tiles;
+    int m_playerX = 0;
+    int m_playerY = 0;
 };
 
 #endif // WORLDMAP_H

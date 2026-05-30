@@ -2,55 +2,71 @@
 
 WorldMap::WorldMap(QObject *parent) : QObject(parent)
 {
-    m_tiles.resize(MapSize, std::vector<MapTile>(MapSize));
-    for (int y = 0; y < MapSize; ++y)
-        for (int x = 0; x < MapSize; ++x) {
-            m_tiles[y][x].x = x;
-            m_tiles[y][x].y = y;
-        }
-    generateRandom();
+    generateInitial();
+}
+
+MapTile &WorldMap::ensureTile(int x, int y)
+{
+    Key k{x, y};
+    auto it = m_tiles.find(k);
+    if (it != m_tiles.end()) return it->second;
+
+    // Generate new tile on-demand
+    MapTile t;
+    t.x = x;
+    t.y = y;
+    t.state = MapTile::Unknown;
+
+    auto *rng = QRandomGenerator::global();
+    int r = rng->bounded(100);
+    if (r < 60) {
+        t.type = MapTile::Plain;
+        t.moveDifficulty = 1.0;
+        int trees = rng->bounded(3, 13);
+        for (int i = 0; i < trees; ++i)
+            t.elements.push_back(QStringLiteral("大树"));
+    } else {
+        t.type = MapTile::Mountain;
+        t.moveDifficulty = 2.0;
+        int rocks = rng->bounded(3, 13);
+        for (int i = 0; i < rocks; ++i)
+            t.elements.push_back(QStringLiteral("石头"));
+    }
+
+    m_tiles[k] = t;
+    return m_tiles[k];
 }
 
 const MapTile *WorldMap::tileAt(int x, int y) const
 {
-    if (!isValidPos(x, y)) return nullptr;
-    return &m_tiles[y][x];
+    auto it = m_tiles.find({x, y});
+    return it != m_tiles.end() ? &it->second : nullptr;
 }
 
 MapTile *WorldMap::tileAt(int x, int y)
 {
-    if (!isValidPos(x, y)) return nullptr;
-    return &m_tiles[y][x];
+    auto it = m_tiles.find({x, y});
+    return it != m_tiles.end() ? &it->second : nullptr;
 }
 
-bool WorldMap::isValidPos(int x, int y) const
+void WorldMap::generateInitial()
 {
-    return x >= 0 && x < MapSize && y >= 0 && y < MapSize;
-}
+    // Pre-generate spawn area
+    for (int dy = -SpawnRadius; dy <= SpawnRadius; ++dy)
+        for (int dx = -SpawnRadius; dx <= SpawnRadius; ++dx)
+            ensureTile(dx, dy);
 
-void WorldMap::generateRandom()
-{
-    auto *rng = QRandomGenerator::global();
-    for (int y = 0; y < MapSize; ++y)
-        for (int x = 0; x < MapSize; ++x) {
-            auto &t = m_tiles[y][x];
-            t.state = MapTile::Unknown;
-            t.elements.clear();
-            int r = rng->bounded(100);
-            if (r < 60) {
-                t.type = MapTile::Plain;
-                t.moveDifficulty = 1.0;
-                int trees = rng->bounded(3, 13);
-                for (int i = 0; i < trees; ++i)
-                    t.elements.push_back(QStringLiteral("大树"));
-            } else {
-                t.type = MapTile::Mountain;
-                t.moveDifficulty = 2.0;
-                int rocks = rng->bounded(3, 13);
-                for (int i = 0; i < rocks; ++i)
-                    t.elements.push_back(QStringLiteral("石头"));
-            }
-        }
+    // Also generate one ring beyond so adjacent tiles exist
+    for (int dy = -SpawnRadius - 1; dy <= SpawnRadius + 1; ++dy) {
+        ensureTile(-SpawnRadius - 1, dy);
+        ensureTile(SpawnRadius + 1, dy);
+    }
+    for (int dx = -SpawnRadius; dx <= SpawnRadius; ++dx) {
+        ensureTile(dx, -SpawnRadius - 1);
+        ensureTile(dx, SpawnRadius + 1);
+    }
+
+    // Set all initial tiles as Unknown, then reveal when player is placed
     updateFog();
     emit mapChanged();
 }
@@ -58,19 +74,28 @@ void WorldMap::generateRandom()
 int WorldMap::moveCostBetween(int x1, int y1, int x2, int y2) const
 {
     auto *a = tileAt(x1, y1);
-    auto *b = tileAt(x2, y2);
-    if (!a || !b) return 0;
-    return static_cast<int>((a->moveDifficulty + b->moveDifficulty) * 30);
+    if (!a) return 60; // default: 1.0 * 2 * 30
+    // Generate target tile if it doesn't exist, then get its difficulty
+    auto *b = const_cast<WorldMap*>(this)->tileAt(x2, y2);
+    double db = b ? b->moveDifficulty : 1.0;
+    return static_cast<int>((a->moveDifficulty + db) * 30);
 }
 
 bool WorldMap::movePlayer(int dx, int dy)
 {
+    // Only orthogonal moves
+    if ((dx != 0 && dy != 0) || (dx == 0 && dy == 0)) return false;
+
     int nx = m_playerX + dx;
     int ny = m_playerY + dy;
-    if (!isValidPos(nx, ny)) return false;
-    // Only allow orthogonal moves
-    if (dx != 0 && dy != 0) return false;
-    if (dx == 0 && dy == 0) return false;
+
+    // Ensure target tile exists (generate if needed)
+    ensureTile(nx, ny);
+    // Pre-generate surrounding tiles for the new location
+    for (int fy = ny - 1; fy <= ny + 1; ++fy)
+        for (int fx = nx - 1; fx <= nx + 1; ++fx)
+            ensureTile(fx, fy);
+
     m_playerX = nx;
     m_playerY = ny;
     updateFog();
@@ -81,25 +106,10 @@ bool WorldMap::movePlayer(int dx, int dy)
 
 void WorldMap::updateFog()
 {
-    // Reveal 3x3 around player
+    // Reveal 3×3 around player
     for (int dy = -FogRadius; dy <= FogRadius; ++dy)
         for (int dx = -FogRadius; dx <= FogRadius; ++dx) {
-            int x = m_playerX + dx;
-            int y = m_playerY + dy;
-            if (isValidPos(x, y))
-                m_tiles[y][x].state = MapTile::Visible;
+            auto &t = ensureTile(m_playerX + dx, m_playerY + dy);
+            t.state = MapTile::Visible;
         }
-    // Mark current position as explored
-    auto *t = tileAt(m_playerX, m_playerY);
-    if (t) {
-        t->state = MapTile::Explored;
-        // Mark adjacent explored tiles
-        for (int dy = -1; dy <= 1; ++dy)
-            for (int dx = -1; dx <= 1; ++dx) {
-                int x = m_playerX + dx;
-                int y = m_playerY + dy;
-                if (isValidPos(x, y) && m_tiles[y][x].state == MapTile::Unknown)
-                    continue;
-            }
-    }
 }
