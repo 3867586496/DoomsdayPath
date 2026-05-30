@@ -7,9 +7,9 @@
 #include "BackpackPage.h"
 #include "SettingsPage.h"
 #include "GameMenuPage.h"
+#include "SavePage.h"
 #include "SaveSystem.h"
 
-#include <QInputDialog>
 #include <QMessageBox>
 
 #include <QApplication>
@@ -45,12 +45,13 @@ void MainWindow::setupUI()
     m_mainMenu = new MainMenuPage(this);
     m_newGame = new NewGamePage(this);
     m_loading = new LoadingPage(this);
-    m_loadGame = new LoadGamePage(m_saveSystem, this);
     m_game = new GamePage(this);
     m_backpack = new BackpackPage(this);
     m_settings = new SettingsPage(this);
     m_gameMenu = new GameMenuPage(this);
     m_saveSystem = new SaveSystem(this);
+    m_savePage = new SavePage(m_saveSystem, this);
+    m_loadGame = new LoadGamePage(m_saveSystem, this);
 
     m_stack->addWidget(m_mainMenu);   // 0
     m_stack->addWidget(m_newGame);     // 1
@@ -59,7 +60,8 @@ void MainWindow::setupUI()
     m_stack->addWidget(m_backpack);    // 4
     m_stack->addWidget(m_settings);    // 5
     m_stack->addWidget(m_gameMenu);    // 6
-    m_stack->addWidget(m_loading);     // 7
+    m_stack->addWidget(m_savePage);    // 7
+    m_stack->addWidget(m_loading);     // 8
 
     // ---- 主菜单 ----
     connect(m_mainMenu, &MainMenuPage::startGameClicked,
@@ -135,9 +137,15 @@ void MainWindow::setupUI()
     connect(m_gameMenu, &GameMenuPage::resumeClicked,
             this, &MainWindow::showGamePage);
     connect(m_gameMenu, &GameMenuPage::saveClicked,
-            this, &MainWindow::doSave);
+            this, &MainWindow::showSavePage);
     connect(m_gameMenu, &GameMenuPage::exitToMainMenu,
             this, &MainWindow::showMainMenu);
+
+    // ---- 存档页 ----
+    connect(m_savePage, &SavePage::cancelled,
+            this, &MainWindow::showGameMenuPage);
+    connect(m_savePage, &SavePage::saveRequested, this,
+            [this](const QString &folderName) { doSave(folderName); });
 }
 
 void MainWindow::showNewGamePage()  { m_stack->setCurrentWidget(m_newGame); }
@@ -169,6 +177,11 @@ void MainWindow::showGamePage()
 void MainWindow::showBackpackPage() { m_stack->setCurrentWidget(m_backpack); }
 void MainWindow::showSettingsPage() { m_stack->setCurrentWidget(m_settings); }
 void MainWindow::showGameMenuPage() { m_stack->setCurrentWidget(m_gameMenu); }
+void MainWindow::showSavePage()
+{
+    m_savePage->refreshList();
+    m_stack->setCurrentWidget(m_savePage);
+}
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -184,17 +197,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     QMainWindow::keyPressEvent(event);
 }
 
-void MainWindow::doSave()
+void MainWindow::doSave(const QString &folderName)
 {
-    // Prompt for save folder name
-    bool ok;
-    QString folderName = QInputDialog::getText(
-        this, QStringLiteral("保存"),
-        QStringLiteral("存档名称:"),
-        QLineEdit::Normal,
-        QStringLiteral("存档1"), &ok);
-    if (!ok || folderName.isEmpty()) return;
-
     // Build save entry from current game state
     SaveEntry entry;
     entry.name = folderName;
@@ -218,7 +222,7 @@ void MainWindow::doSave()
     if (m_saveSystem->saveEntry(folderName, entry)) {
         QMessageBox::information(this, QStringLiteral("保存成功"),
             QStringLiteral("存档已保存"));
-        showMainMenu();
+        m_savePage->refreshList();
     } else {
         QMessageBox::warning(this, QStringLiteral("保存失败"),
             QStringLiteral("无法保存存档"));

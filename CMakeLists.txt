@@ -47,6 +47,8 @@ qt_add_executable(DoomsdayPath
     src/GameMenuPage.cpp
     src/SaveSystem.h
     src/SaveSystem.cpp
+    src/SavePage.h
+    src/SavePage.cpp
 )
 
 target_link_libraries(DoomsdayPath PRIVATE Qt6::Core Qt6::Widgets Qt6::Gui)

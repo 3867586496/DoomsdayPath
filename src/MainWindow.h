@@ -14,6 +14,7 @@ class GamePage;
 class BackpackPage;
 class SettingsPage;
 class GameMenuPage;
+class SavePage;
 class SaveSystem;
 
 class MainWindow : public QMainWindow
@@ -36,6 +37,7 @@ private slots:
     void showBackpackPage();
     void showSettingsPage();
     void showGameMenuPage();
+    void showSavePage();
 
 private:
     void setupUI();
@@ -49,9 +51,10 @@ private:
     BackpackPage *m_backpack = nullptr;
     SettingsPage *m_settings = nullptr;
     GameMenuPage *m_gameMenu = nullptr;
+    SavePage *m_savePage = nullptr;
     SaveSystem *m_saveSystem = nullptr;
 
-    void doSave();
+    void doSave(const QString &folderName);
 };
 
 #endif // MAINWINDOW_H
