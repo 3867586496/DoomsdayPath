@@ -69,6 +69,7 @@ private:
 
     QVBoxLayout *m_actionLayout = nullptr;
     QWidget *m_testArea = nullptr;
+    QLabel *m_invFullLabel = nullptr;
     int m_autoSaveInterval = 1;  // days, default 1
 };
 

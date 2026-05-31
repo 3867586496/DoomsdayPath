@@ -3,6 +3,7 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QKeyEvent>
+#include <QShowEvent>
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -190,4 +191,10 @@ void MapPage::keyPressEvent(QKeyEvent *event)
     case Qt::Key_D:     case Qt::Key_Right: tryMove(1, 0);  break;
     default: QWidget::keyPressEvent(event); return;
     }
+}
+
+void MapPage::showEvent(QShowEvent *event)
+{
+    QWidget::showEvent(event);
+    setFocus();
 }

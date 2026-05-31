@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QRandomGenerator>
+#include <QTimer>
 #include <QVBoxLayout>
 
 GamePage::GamePage(QWidget *parent)
@@ -78,6 +79,14 @@ void GamePage::setupUI()
     m_actionLayout = new QVBoxLayout();
     m_actionLayout->setSpacing(6);
     testLayout->addLayout(m_actionLayout);
+
+    // Inventory full warning label (hidden by default)
+    m_invFullLabel = new QLabel(QStringLiteral("背包已满，无法拾取更多物品！"), this);
+    m_invFullLabel->setAlignment(Qt::AlignCenter);
+    m_invFullLabel->setStyleSheet(QStringLiteral(
+        "QLabel{color:#ff6b81;font-size:14px;padding:4px;background:#2a1a1a;border:1px solid #e94560;border-radius:4px}"));
+    m_invFullLabel->setVisible(false);
+    testLayout->addWidget(m_invFullLabel);
 
     QPushButton *btnBackpack = new QPushButton(
         QStringLiteral("[背包] 打开背包"), this);
@@ -278,10 +287,16 @@ void GamePage::onActionClicked(const Action &action)
     m_stats.applyChanges(action.yields());
 
     auto *rng = QRandomGenerator::global();
+    bool invFull = false;
     for (const auto &entry : action.loot()) {
         if (rng->bounded(100) < entry.probability) {
-            m_inventory->addItem(entry.item);
+            if (!m_inventory->addItem(entry.item))
+                invFull = true;
         }
+    }
+    if (invFull) {
+        m_invFullLabel->setVisible(true);
+        QTimer::singleShot(3000, m_invFullLabel, [this]() { m_invFullLabel->setVisible(false); });
     }
 
     m_time.advance(action.timeCostMinutes());

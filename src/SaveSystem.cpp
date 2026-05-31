@@ -180,7 +180,12 @@ bool SaveSystem::deleteEntry(const QString &folderName, int index)
     QStringList files = dir.entryList({"*.json"}, QDir::Files, QDir::Name | QDir::Reversed);
     if (index < 0 || index >= files.size()) return false;
     bool ok = QFile::remove(dir.filePath(files[index]));
-    if (ok) emit savesChanged();
+    if (ok) {
+        // Clean up empty folder
+        if (dir.entryList({"*.json"}, QDir::Files).isEmpty())
+            QDir().rmdir(dir.absolutePath());
+        emit savesChanged();
+    }
     return ok;
 }
 
