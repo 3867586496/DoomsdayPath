@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "MapElement.h"
+#include "Item.h"
 
 class QStackedWidget;
 class QCloseEvent;
@@ -66,6 +67,13 @@ private:
     ContainerPage *m_containerPage = nullptr;
     WorldMap *m_worldMap = nullptr;
     SaveSystem *m_saveSystem = nullptr;
+
+    // Container item cache: key = "tileX_tileY_buildingId_containerId"
+    QMap<QString, std::vector<Item>> m_containerItemCache;
+    QString m_openContainerCacheKey;
+    static QString containerCacheKey(int tx, int ty, int bid, int cid) {
+        return QStringLiteral("%1_%2_%3_%4").arg(tx).arg(ty).arg(bid).arg(cid);
+    }
 
     void doSave(const QString &folderName);
 };

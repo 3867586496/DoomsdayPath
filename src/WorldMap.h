@@ -39,6 +39,9 @@ public:
     // Gather a natural resource from current tile (returns true if found & removed)
     bool gatherElement(int elementId);
 
+    // Mark a container as opened in cached building interior
+    void markContainerOpened(int tileX, int tileY, int buildingId, int containerId);
+
 public slots:
     void generateInitial();
 

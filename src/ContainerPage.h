@@ -21,6 +21,10 @@ public:
                       int tileX, int tileY, int buildingId);
     void setBackpackInventory(const std::vector<Item> &items);
 
+    // Container item persistence
+    void setContainerItems(const std::vector<Item> &items);
+    std::vector<Item> containerItems() const { return m_containerItems; }
+
 signals:
     void closed();
     void containerSearched(int tileX, int tileY, int buildingId, int containerId);

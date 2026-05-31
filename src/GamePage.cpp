@@ -201,9 +201,8 @@ void GamePage::leaveBuilding()
 
 void GamePage::containerOpened(int buildingId, int containerId)
 {
-    if (!m_inBuilding || m_buildingId != buildingId) return;
-
-    // Mark container as opened
+    // Validate: if indoor, must match current building
+    if (buildingId > 0 && (!m_inBuilding || m_buildingId != buildingId)) return;
     for (auto &e : m_currentElements) {
         if (e.isContainer() && e.id == containerId) {
             e.containerOpened = true;
@@ -290,9 +289,8 @@ void GamePage::onElementAction(int row)
     } else if (elem.isBuilding()) {
         emit enterBuildingRequested(elem, m_map->playerX(), m_map->playerY());
     } else if (elem.isContainer()) {
-        if (m_inBuilding) {
-            emit openContainerRequested(elem, m_buildingTileX, m_buildingTileY, m_buildingId);
-        }
+        int bid = m_inBuilding ? m_buildingId : 0;
+        emit openContainerRequested(elem, m_map->playerX(), m_map->playerY(), bid);
     }
 }
 

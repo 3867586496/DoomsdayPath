@@ -203,11 +203,15 @@ void MainWindow::setupUI()
 
     // ---- 容器页 ----
     connect(m_containerPage, &ContainerPage::closed, this, [this]() {
+        // Save container items to cache before leaving
+        if (!m_openContainerCacheKey.isEmpty())
+            m_containerItemCache[m_openContainerCacheKey] = m_containerPage->containerItems();
+        m_openContainerCacheKey.clear();
         showGamePage();
     });
     connect(m_containerPage, &ContainerPage::containerSearched, this,
             [this](int tileX, int tileY, int buildingId, int containerId) {
-                // Mark container as opened in GamePage context
+                m_worldMap->markContainerOpened(tileX, tileY, buildingId, containerId);
                 m_game->containerOpened(buildingId, containerId);
             });
     connect(m_containerPage, &ContainerPage::itemTransferredToBackpack,
@@ -218,10 +222,13 @@ void MainWindow::setupUI()
     connect(m_containerPage, &ContainerPage::itemTransferredToContainer,
             this, [this](const Item &item, int count) {
                 auto *inv = m_game->inventory();
-                for (int i = 0; i < inv->count(); ++i) {
-                    if (inv->itemAt(i)->name() == item.name()) {
-                        inv->removeItem(i);
-                        break;
+                for (int c = 0; c < count; ++c) {
+                    for (int i = 0; i < inv->count(); ++i) {
+                        const Item *it = inv->itemAt(i);
+                        if (it && it->name() == item.name()) {
+                            inv->removeItem(i);
+                            break;
+                        }
                     }
                 }
             });
@@ -279,6 +286,13 @@ void MainWindow::showContainerPage(const TileElement &container,
                                     int tileX, int tileY, int buildingId)
 {
     m_containerPage->setContainer(container, tileX, tileY, buildingId);
+    m_openContainerCacheKey = containerCacheKey(tileX, tileY, buildingId, container.id);
+
+    // Restore cached container items if any
+    QString key = containerCacheKey(tileX, tileY, buildingId, container.id);
+    auto ci = m_containerItemCache.find(key);
+    if (ci != m_containerItemCache.end() && !ci->empty())
+        m_containerPage->setContainerItems(ci.value());
 
     // Pass backpack items to container page
     std::vector<Item> bpItems;

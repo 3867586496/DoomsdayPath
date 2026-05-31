@@ -156,3 +156,34 @@ bool WorldMap::gatherElement(int elementId)
     }
     return false;
 }
+
+void WorldMap::markContainerOpened(int tileX, int tileY,
+                                    int buildingId, int containerId)
+{
+    if (buildingId > 0) {
+        // Building interior container
+        InteriorKey key{tileX, tileY, buildingId};
+        auto it = m_buildingInteriors.find(key);
+        if (it == m_buildingInteriors.end()) {
+            buildingInterior(tileX, tileY, buildingId);
+            it = m_buildingInteriors.find(key);
+        }
+        if (it == m_buildingInteriors.end()) return;
+        for (auto &e : it->second) {
+            if (e.isContainer() && e.id == containerId) {
+                e.containerOpened = true;
+                return;
+            }
+        }
+    } else {
+        // Outdoor tile container
+        auto ti = m_tiles.find({tileX, tileY});
+        if (ti == m_tiles.end()) return;
+        for (auto &e : ti->second.elements) {
+            if (e.isContainer() && e.id == containerId) {
+                e.containerOpened = true;
+                return;
+            }
+        }
+    }
+}

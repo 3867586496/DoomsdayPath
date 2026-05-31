@@ -105,6 +105,7 @@ void ContainerPage::setupUI()
     connect(m_btnReturn, &QPushButton::clicked, this, &ContainerPage::closed);
 
     connect(m_btnSearch, &QPushButton::clicked, this, [this]() {
+        m_btnSearch->setVisible(false);  // prevent double-tap loot duplication
         // Generate loot for unopened container
         auto loot = elementGatherLoot(m_container.type);
         auto *rng = QRandomGenerator::global();
@@ -136,6 +137,7 @@ void ContainerPage::setContainer(const TileElement &container,
     m_titleLabel->setText(QStringLiteral("%1 #%2")
         .arg(container.name()).arg(container.id));
 
+    // If container was already opened, hide search; if not, show it
     if (!container.containerOpened) {
         m_btnSearch->setVisible(true);
         m_btnSearch->setText(QStringLiteral("搜索 (%1分钟)")
@@ -150,6 +152,12 @@ void ContainerPage::setContainer(const TileElement &container,
 void ContainerPage::setBackpackInventory(const std::vector<Item> &items)
 {
     m_backpackItems = items;
+    refresh();
+}
+
+void ContainerPage::setContainerItems(const std::vector<Item> &items)
+{
+    m_containerItems = items;
     refresh();
 }
 
