@@ -290,6 +290,7 @@ void ContainerPage::onTransferToBackpack(int mergedRow)
 
     emit itemTransferredToBackpack(item, 1);
     m_containerItems.erase(m_containerItems.begin() + idx);
+    m_backpackItems.push_back(item);
     refresh();
 }
 
@@ -314,5 +315,6 @@ void ContainerPage::onTransferToContainer(int mergedRow)
 
     emit itemTransferredToContainer(item, 1);
     m_backpackItems.erase(m_backpackItems.begin() + idx);
+    m_containerItems.push_back(item);
     refresh();
 }

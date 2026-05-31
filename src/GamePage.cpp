@@ -229,8 +229,11 @@ void GamePage::refreshElementTable()
     for (const auto &elem : m_currentElements) {
         m_elemTable->insertRow(row);
 
-        // Column 0: name
-        auto *nameItem = new QTableWidgetItem(elem.name());
+        // Column 0: name (with ID for buildings & containers)
+        QString displayName = elem.name();
+        if (elem.isBuilding() || elem.isContainer())
+            displayName = QStringLiteral("%1 #%2").arg(elem.name()).arg(elem.id);
+        auto *nameItem = new QTableWidgetItem(displayName);
         nameItem->setFlags(nameItem->flags() & ~Qt::ItemIsEditable);
         m_elemTable->setItem(row, 0, nameItem);
 
