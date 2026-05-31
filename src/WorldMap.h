@@ -2,6 +2,7 @@
 #define WORLDMAP_H
 
 #include "MapTile.h"
+#include "MapElement.h"
 #include <QObject>
 #include <QRandomGenerator>
 #include <map>
@@ -29,6 +30,15 @@ public:
     // Move player: updates fog, returns true if valid
     bool movePlayer(int dx, int dy);
 
+    // Building interiors — generated on first access
+    std::vector<TileElement> buildingInterior(int tileX, int tileY, int buildingId);
+
+    // Current tile convenience
+    const MapTile *currentTile() const { return tileAt(m_playerX, m_playerY); }
+
+    // Gather a natural resource from current tile (returns true if found & removed)
+    bool gatherElement(int elementId);
+
 public slots:
     void generateInitial();
 
@@ -41,7 +51,9 @@ private:
     MapTile &ensureTile(int x, int y);
 
     using Key = std::pair<int, int>;
+    using InteriorKey = std::tuple<int, int, int>;  // tileX, tileY, buildingId
     std::map<Key, MapTile> m_tiles;
+    std::map<InteriorKey, std::vector<TileElement>> m_buildingInteriors;
     int m_playerX = 0;
     int m_playerY = 0;
 };

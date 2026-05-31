@@ -10,13 +10,14 @@
 #include "SavePage.h"
 #include "MapPage.h"
 #include "SmallMapPage.h"
+#include "ContainerPage.h"
 #include "WorldMap.h"
 #include "SaveSystem.h"
-
-#include <QMessageBox>
+#include "MapElement.h"
 
 #include <QApplication>
 #include <QKeyEvent>
+#include <QMessageBox>
 #include <QScreen>
 #include <QStackedWidget>
 
@@ -45,31 +46,35 @@ void MainWindow::setupUI()
     m_stack = new QStackedWidget(this);
     setCentralWidget(m_stack);
 
-    m_mainMenu = new MainMenuPage(this);
-    m_newGame = new NewGamePage(this);
-    m_loading = new LoadingPage(this);
-    m_game = new GamePage(this);
-    m_backpack = new BackpackPage(this);
-    m_settings = new SettingsPage(this);
-    m_gameMenu = new GameMenuPage(this);
-    m_saveSystem = new SaveSystem(this);
-    m_savePage = new SavePage(m_saveSystem, this);
-    m_worldMap = new WorldMap(this);
-    m_mapPage = new MapPage(m_worldMap, this);
+    // ---- Create all pages ----
+    m_mainMenu     = new MainMenuPage(this);
+    m_newGame      = new NewGamePage(this);
+    m_loading      = new LoadingPage(this);
+    m_worldMap     = new WorldMap(this);
+    m_game         = new GamePage(m_worldMap, this);
+    m_backpack     = new BackpackPage(this);
+    m_settings     = new SettingsPage(this);
+    m_gameMenu     = new GameMenuPage(this);
+    m_saveSystem   = new SaveSystem(this);
+    m_savePage     = new SavePage(m_saveSystem, this);
+    m_mapPage      = new MapPage(m_worldMap, this);
     m_smallMapPage = new SmallMapPage(m_worldMap, this);
-    m_loadGame = new LoadGamePage(m_saveSystem, this);
+    m_loadGame     = new LoadGamePage(m_saveSystem, this);
+    m_containerPage = new ContainerPage(this);
 
-    m_stack->addWidget(m_mainMenu);    // 0
-    m_stack->addWidget(m_newGame);      // 1
-    m_stack->addWidget(m_loadGame);     // 2
-    m_stack->addWidget(m_game);         // 3
-    m_stack->addWidget(m_backpack);     // 4
-    m_stack->addWidget(m_settings);     // 5
-    m_stack->addWidget(m_gameMenu);     // 6
-    m_stack->addWidget(m_savePage);     // 7
-    m_stack->addWidget(m_mapPage);      // 8
-    m_stack->addWidget(m_smallMapPage); // 9
-    m_stack->addWidget(m_loading);      // 10
+    // Stack indices
+    m_stack->addWidget(m_mainMenu);      // 0
+    m_stack->addWidget(m_newGame);       // 1
+    m_stack->addWidget(m_loadGame);      // 2
+    m_stack->addWidget(m_game);          // 3
+    m_stack->addWidget(m_backpack);      // 4
+    m_stack->addWidget(m_settings);      // 5
+    m_stack->addWidget(m_gameMenu);      // 6
+    m_stack->addWidget(m_savePage);      // 7
+    m_stack->addWidget(m_mapPage);       // 8
+    m_stack->addWidget(m_smallMapPage);  // 9
+    m_stack->addWidget(m_loading);       // 10
+    m_stack->addWidget(m_containerPage); // 11
 
     // ---- 主菜单 ----
     connect(m_mainMenu, &MainMenuPage::startGameClicked,
@@ -83,9 +88,7 @@ void MainWindow::setupUI()
                 auto entries = m_saveSystem->entriesInFolder(folder);
                 if (entryIdx < 0 || entryIdx >= static_cast<int>(entries.size()))
                     return;
-                auto &e = entries[entryIdx];
                 // TODO: actually load game state from SaveEntry
-                // For now, just go to game page
                 showGamePage();
             });
     connect(m_mainMenu, &MainMenuPage::settingsClicked,
@@ -106,6 +109,12 @@ void MainWindow::setupUI()
             this, &MainWindow::showBackpackPage);
     connect(m_game, &GamePage::openGameMenu,
             this, &MainWindow::showGameMenuPage);
+    connect(m_game, &GamePage::openBigMap,
+            this, &MainWindow::showMapPage);
+    connect(m_game, &GamePage::openSmallMap,
+            this, &MainWindow::showSmallMapPage);
+
+    // Auto-save
     connect(m_game, &GamePage::autoSaveTriggered, this, [this]() {
         SaveEntry entry;
         entry.name = QStringLiteral("auto");
@@ -126,6 +135,24 @@ void MainWindow::setupUI()
         }
         m_saveSystem->saveEntry(QStringLiteral("auto"), entry);
     });
+
+    // Building entry / exit
+    connect(m_game, &GamePage::enterBuildingRequested, this,
+            [this](const TileElement &building, int tileX, int tileY) {
+                m_game->enterBuilding(building.id);
+            });
+    connect(m_game, &GamePage::leaveBuildingRequested, this,
+            [this]() {
+                // Already handled in GamePage::leaveBuilding(), just refresh map
+            });
+
+    // Container open
+    connect(m_game, &GamePage::openContainerRequested, this,
+            [this](const TileElement &container, int tileX, int tileY, int buildingId) {
+                showContainerPage(container, tileX, tileY, buildingId);
+            });
+
+    // ---- 背包页 ----
     connect(m_backpack, &BackpackPage::closed,
             this, &MainWindow::showGamePage);
     connect(m_backpack, &BackpackPage::itemUsed,
@@ -167,19 +194,42 @@ void MainWindow::setupUI()
     connect(m_mapPage, &MapPage::tileEntered, this,
             [this](int, int, int cost) {
                 m_game->advanceTime(cost);
+                m_game->refreshTileContext();
             });
 
     // ---- 小地图页 ----
     connect(m_smallMapPage, &SmallMapPage::returnToGame,
             this, &MainWindow::showGamePage);
 
-    // ---- 游戏页扩展 ----
-    connect(m_game, &GamePage::openBigMap,
-            this, &MainWindow::showMapPage);
-    connect(m_game, &GamePage::openSmallMap,
-            this, &MainWindow::showSmallMapPage);
+    // ---- 容器页 ----
+    connect(m_containerPage, &ContainerPage::closed, this, [this]() {
+        showGamePage();
+    });
+    connect(m_containerPage, &ContainerPage::containerSearched, this,
+            [this](int tileX, int tileY, int buildingId, int containerId) {
+                // Mark container as opened in GamePage context
+                m_game->containerOpened(buildingId, containerId);
+            });
+    connect(m_containerPage, &ContainerPage::itemTransferredToBackpack,
+            this, [this](const Item &item, int count) {
+                for (int i = 0; i < count; ++i)
+                    m_game->inventory()->addItem(item);
+            });
+    connect(m_containerPage, &ContainerPage::itemTransferredToContainer,
+            this, [this](const Item &item, int count) {
+                auto *inv = m_game->inventory();
+                for (int i = 0; i < inv->count(); ++i) {
+                    if (inv->itemAt(i)->name() == item.name()) {
+                        inv->removeItem(i);
+                        break;
+                    }
+                }
+            });
 }
 
+// ---------------------------------------------------------------------------
+// Page navigation
+// ---------------------------------------------------------------------------
 void MainWindow::showNewGamePage()  { m_stack->setCurrentWidget(m_newGame); }
 void MainWindow::showLoadGamePage()
 {
@@ -189,6 +239,7 @@ void MainWindow::showLoadGamePage()
 void MainWindow::showMainMenu()     { m_stack->setCurrentWidget(m_mainMenu); }
 void MainWindow::showGamePage()
 {
+    m_game->refreshTileContext();
     m_backpack->setInventory(m_game->inventory());
     m_backpack->setCanUseCallback([this](const std::vector<StatChange> &effects) -> bool {
         for (const auto &e : effects) {
@@ -224,7 +275,25 @@ void MainWindow::showSmallMapPage()
     m_smallMapPage->refresh();
     m_stack->setCurrentWidget(m_smallMapPage);
 }
+void MainWindow::showContainerPage(const TileElement &container,
+                                    int tileX, int tileY, int buildingId)
+{
+    m_containerPage->setContainer(container, tileX, tileY, buildingId);
 
+    // Pass backpack items to container page
+    std::vector<Item> bpItems;
+    for (int i = 0; i < m_game->inventory()->count(); ++i) {
+        const Item *it = m_game->inventory()->itemAt(i);
+        if (it) bpItems.push_back(*it);
+    }
+    m_containerPage->setBackpackInventory(bpItems);
+
+    m_stack->setCurrentWidget(m_containerPage);
+}
+
+// ---------------------------------------------------------------------------
+// Window events
+// ---------------------------------------------------------------------------
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     QMainWindow::closeEvent(event);
@@ -239,9 +308,11 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     QMainWindow::keyPressEvent(event);
 }
 
+// ---------------------------------------------------------------------------
+// Save
+// ---------------------------------------------------------------------------
 void MainWindow::doSave(const QString &folderName)
 {
-    // Build save entry from current game state
     SaveEntry entry;
     entry.name = folderName;
     entry.day = m_game->gameTime().day();
@@ -255,7 +326,6 @@ void MainWindow::doSave(const QString &folderName)
     entry.timestamp = QDateTime::currentDateTime();
     entry.isAuto = false;
 
-    // Copy inventory items
     auto *inv = m_game->inventory();
     for (int i = 0; i < inv->count(); ++i) {
         const Item *item = inv->itemAt(i);

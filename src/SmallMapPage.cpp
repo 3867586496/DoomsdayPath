@@ -83,10 +83,10 @@ void SmallMapPage::refresh()
         return;
     }
 
-    // Count elements
+    // Count elements by name
     QMap<QString, int> counts;
     for (const auto &e : tile->elements)
-        counts[e]++;
+        counts[e.name()]++;
 
     m_table->setRowCount(counts.size());
     int row = 0;

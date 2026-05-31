@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "MapElement.h"
 
 class QStackedWidget;
 class QCloseEvent;
@@ -17,6 +18,7 @@ class GameMenuPage;
 class SavePage;
 class MapPage;
 class SmallMapPage;
+class ContainerPage;
 class WorldMap;
 class SaveSystem;
 
@@ -43,6 +45,8 @@ private slots:
     void showSavePage();
     void showMapPage();
     void showSmallMapPage();
+    void showContainerPage(const TileElement &container,
+                           int tileX, int tileY, int buildingId);
 
 private:
     void setupUI();
@@ -59,6 +63,7 @@ private:
     SavePage *m_savePage = nullptr;
     MapPage *m_mapPage = nullptr;
     SmallMapPage *m_smallMapPage = nullptr;
+    ContainerPage *m_containerPage = nullptr;
     WorldMap *m_worldMap = nullptr;
     SaveSystem *m_saveSystem = nullptr;
 

@@ -19,18 +19,31 @@ MapTile &WorldMap::ensureTile(int x, int y)
 
     auto *rng = QRandomGenerator::global();
     int r = rng->bounded(100);
-    if (r < 60) {
+    if (r < 34) {
+        // 平原: 大树 3-12
         t.type = MapTile::Plain;
         t.moveDifficulty = 1.0;
         int trees = rng->bounded(3, 13);
         for (int i = 0; i < trees; ++i)
-            t.elements.push_back(QStringLiteral("大树"));
-    } else {
+            t.elements.push_back({MapElementType::Tree, i + 1});
+    } else if (r < 67) {
+        // 山地: 石头 3-12
         t.type = MapTile::Mountain;
         t.moveDifficulty = 2.0;
         int rocks = rng->bounded(3, 13);
         for (int i = 0; i < rocks; ++i)
-            t.elements.push_back(QStringLiteral("石头"));
+            t.elements.push_back({MapElementType::Stone, i + 1});
+    } else {
+        // 农村: 小平房 1-3, 大树 3-12, 垃圾桶 1
+        t.type = MapTile::Village;
+        t.moveDifficulty = 1.0;
+        int houses = rng->bounded(1, 4);
+        for (int i = 0; i < houses; ++i)
+            t.elements.push_back({MapElementType::SmallHouse, i + 1});
+        int trees = rng->bounded(3, 13);
+        for (int i = 0; i < trees; ++i)
+            t.elements.push_back({MapElementType::Tree, i + 1});
+        t.elements.push_back({MapElementType::TrashCan, 1});
     }
 
     m_tiles[k] = t;
@@ -111,4 +124,35 @@ void WorldMap::updateFog()
             auto &t = ensureTile(m_playerX + dx, m_playerY + dy);
             t.state = MapTile::Visible;
         }
+}
+
+std::vector<TileElement> WorldMap::buildingInterior(int tileX, int tileY, int buildingId)
+{
+    InteriorKey key{tileX, tileY, buildingId};
+    auto it = m_buildingInteriors.find(key);
+    if (it != m_buildingInteriors.end())
+        return it->second;
+
+    std::vector<TileElement> interior;
+    // 小平房: 100% 有垃圾桶
+    TileElement trashCan{MapElementType::TrashCan, 1};
+    interior.push_back(trashCan);
+
+    m_buildingInteriors[key] = interior;
+    return interior;
+}
+
+bool WorldMap::gatherElement(int elementId)
+{
+    auto it = m_tiles.find({m_playerX, m_playerY});
+    if (it == m_tiles.end()) return false;
+    auto &elements = it->second.elements;
+    for (auto git = elements.begin(); git != elements.end(); ++git) {
+        if (git->id == elementId && git->canGather()) {
+            elements.erase(git);
+            emit mapChanged();
+            return true;
+        }
+    }
+    return false;
 }
