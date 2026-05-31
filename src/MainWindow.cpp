@@ -114,6 +114,15 @@ void MainWindow::setupUI()
     connect(m_game, &GamePage::openSmallMap,
             this, &MainWindow::showSmallMapPage);
 
+    // Player death
+    connect(m_game, &GamePage::playerDied, this, [this]() {
+        QMessageBox::critical(this, QStringLiteral("你死了"),
+            QStringLiteral("你的生命值归零，旅途到此结束。"));
+        m_containerItemCache.clear();
+        m_openContainerCacheKey.clear();
+        showMainMenu();
+    });
+
     // Auto-save
     connect(m_game, &GamePage::autoSaveTriggered, this, [this]() {
         SaveEntry entry;
@@ -242,7 +251,11 @@ void MainWindow::setupUI()
 // ---------------------------------------------------------------------------
 // Page navigation
 // ---------------------------------------------------------------------------
-void MainWindow::showNewGamePage()  { m_stack->setCurrentWidget(m_newGame); }
+void MainWindow::showNewGamePage()  {
+    m_containerItemCache.clear();
+    m_openContainerCacheKey.clear();
+    m_stack->setCurrentWidget(m_newGame);
+}
 void MainWindow::showLoadGamePage()
 {
     m_loadGame->refreshList();

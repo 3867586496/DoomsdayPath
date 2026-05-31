@@ -53,6 +53,7 @@ signals:
     void openBigMap();
     void openSmallMap();
     void autoSaveTriggered();
+    void playerDied();
     void enterBuildingRequested(const TileElement &building, int tileX, int tileY);
     void leaveBuildingRequested();
     void openContainerRequested(const TileElement &container,

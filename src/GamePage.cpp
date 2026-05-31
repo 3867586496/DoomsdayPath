@@ -302,6 +302,27 @@ void GamePage::onElementAction(int row)
 // ---------------------------------------------------------------------------
 void GamePage::applyGather(const TileElement &elem)
 {
+    // Check if inventory has enough space for at least the guaranteed loot
+    auto loot = elementGatherLoot(elem.type);
+    bool hasSpace = false;
+    for (const auto &entry : loot) {
+        // At least one guaranteed item must be addable
+        Item probe = (entry.itemName == QStringLiteral("木板"))
+            ? Item(QStringLiteral("木板"), QString(), 0.5)
+            : (entry.itemName == QStringLiteral("石子"))
+            ? Item(QStringLiteral("石子"), QString(), 2.0)
+            : Item(QStringLiteral("废纸"), QString(), 0.01);
+        if (m_inventory->canAdd(probe)) {
+            hasSpace = true;
+            break;
+        }
+    }
+    if (!hasSpace) {
+        m_invFullLabel->setVisible(true);
+        QTimer::singleShot(3000, m_invFullLabel, [this]() { m_invFullLabel->setVisible(false); });
+        return;
+    }
+
     int mins = elem.gatherTimeMinutes();
 
     // Save pre-tick day/hour for auto-save
@@ -317,7 +338,6 @@ void GamePage::applyGather(const TileElement &elem)
     });
 
     // Generate loot
-    auto loot = elementGatherLoot(elem.type);
     bool invFull = false;
     auto *rng = QRandomGenerator::global();
     for (const auto &entry : loot) {
@@ -392,6 +412,9 @@ void GamePage::refreshStats()
     m_thirstLabel->setText(m_stats.thirstString());
     m_sanityLabel->setText(m_stats.sanityString());
     m_restLabel->setText(m_stats.restString());
+
+    if (m_stats.hp() <= 0)
+        emit playerDied();
 }
 
 void GamePage::applyItemEffects(const std::vector<StatChange> &effects)
