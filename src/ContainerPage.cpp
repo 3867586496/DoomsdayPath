@@ -1,6 +1,23 @@
 #include "ContainerPage.h"
 #include "MapElement.h"
 
+// =============================================================================
+// ContainerPage — Backpack ↔ Container transfer UI
+// =============================================================================
+// Two-table split layout: left = backpack items, right = container items.
+// Each table merges identical items into one row (name | qty | function | btn).
+//
+// Unopened containers show a "搜索" (search) button first; clicking it runs
+// the loot table and marks the container as opened. Opened containers show
+// items directly with "← 取出" / "存入 →" transfer buttons.
+//
+// Transfer flow: clicking a transfer button → onTransferToXxx() removes from
+// source list, adds to dest list, emits signal for MainWindow to sync the
+// real game inventory, then calls refresh() to rebuild both tables.
+//
+// Item persistence: container items are cached in MainWindow so they survive
+// closing and reopening the page. setContainerItems() restores them.
+
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
@@ -167,6 +184,8 @@ void ContainerPage::refresh()
     populateBackpackItems();
 }
 
+// Merge identical items by name so the table shows one row per item type
+// with a quantity count, rather than one row per individual item instance.
 void ContainerPage::populateContainerItems()
 {
     m_containerTable->setRowCount(0);
@@ -268,6 +287,11 @@ void ContainerPage::populateBackpackItems()
     }
 }
 
+// Transfer one item from container to backpack.
+// mergedRow = merged-group index (from the same merge logic as populate)
+// Recomputes the merge fresh (grid may have changed), finds the first item
+// in that group, emits itemTransferredToBackpack so MainWindow updates game
+// inventory, then mirrors the move locally and refreshes both tables.
 void ContainerPage::onTransferToBackpack(int mergedRow)
 {
     // Find first item of this merged group and remove it

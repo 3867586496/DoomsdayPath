@@ -14,6 +14,18 @@ class QPushButton;
 class QTableWidget;
 class WorldMap;
 
+// =============================================================================
+// GamePage — Primary gameplay screen
+// =============================================================================
+// Layout: top-left stats | top-right location info | centre element table |
+//         bottom nav buttons (big map, small map, backpack, game menu).
+//
+// Element table contents depend on whether the player is outdoors (tile
+// elements: trees, stones, houses, trash cans) or inside a building
+// (interior elements: typically just a trash can).
+//
+// Time flows through actions (gather, enter, search)—each action advances
+// the clock by a fixed number of minutes and triggers hourly ticks.
 class GamePage : public QWidget
 {
     Q_OBJECT
@@ -53,7 +65,6 @@ signals:
     void openBigMap();
     void openSmallMap();
     void autoSaveTriggered();
-    void playerDied();
     void enterBuildingRequested(const TileElement &building, int tileX, int tileY);
     void leaveBuildingRequested();
     void openContainerRequested(const TileElement &container,

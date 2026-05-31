@@ -1,3 +1,20 @@
+// =============================================================================
+// MainWindow — Application shell & page router
+// =============================================================================
+// Owns all pages in a QStackedWidget. Acts as the central nervous system:
+// every page only knows how to emit signals; MainWindow wires those signals
+// to page transitions and data synchronisation.
+//
+// Container item persistence: container items live in m_containerItemCache,
+// keyed by "tileX_tileY_buildingId_containerId". On ContainerPage::closed
+// the cache is updated; on showContainerPage it's restored. Cleared when
+// starting a new game to prevent cross-game contamination.
+//
+// Stack indices:
+//   0=mainMenu  1=newGame  2=loadGame  3=game  4=backpack
+//   5=settings  6=gameMenu  7=savePage  8=mapPage  9=smallMapPage
+//   10=loading  11=containerPage
+
 #include "MainWindow.h"
 #include "MainMenuPage.h"
 #include "NewGamePage.h"
@@ -113,15 +130,6 @@ void MainWindow::setupUI()
             this, &MainWindow::showMapPage);
     connect(m_game, &GamePage::openSmallMap,
             this, &MainWindow::showSmallMapPage);
-
-    // Player death
-    connect(m_game, &GamePage::playerDied, this, [this]() {
-        QMessageBox::critical(this, QStringLiteral("你死了"),
-            QStringLiteral("你的生命值归零，旅途到此结束。"));
-        m_containerItemCache.clear();
-        m_openContainerCacheKey.clear();
-        showMainMenu();
-    });
 
     // Auto-save
     connect(m_game, &GamePage::autoSaveTriggered, this, [this]() {

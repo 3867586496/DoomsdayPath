@@ -1,3 +1,17 @@
+// =============================================================================
+// GamePage — Primary gameplay screen
+// =============================================================================
+// Constructed with a WorldMap reference that provides tile data, building
+// interiors, and element interactions. Owns PlayerStats, GameTime, Inventory.
+//
+// Key interaction flow:
+//   refreshTileContext → loads elements from map → refreshElementTable
+//   user clicks action button → onElementAction → emits signal or applyGather
+//
+// Signals are routed through MainWindow which handles page switching
+// (container page, map page, backpack page). This keeps GamePage decoupled
+// from the other pages—it only needs to know what the player clicked.
+
 #include "GamePage.h"
 #include "WorldMap.h"
 
@@ -300,6 +314,17 @@ void GamePage::onElementAction(int row)
 // ---------------------------------------------------------------------------
 // Gather logic
 // ---------------------------------------------------------------------------
+// =============================================================================
+// Gather logic — the primary action: cut trees / collect stones / search bins
+// =============================================================================
+// Flow:
+//   1. Check if inventory has space for at least one guaranteed loot item
+//   2. Process hourly ticks for the action duration
+//   3. Apply stat changes (hunger/thirst cost for the labour)
+//   4. Roll bonus loot via RNG
+//   5. Add items to inventory (tracking full-bag state)
+//   6. Advance game time, remove the resource from the map (outdoor only)
+//   7. Check auto-save interval, then refresh the UI
 void GamePage::applyGather(const TileElement &elem)
 {
     // Check if inventory has enough space for at least the guaranteed loot
@@ -412,9 +437,6 @@ void GamePage::refreshStats()
     m_thirstLabel->setText(m_stats.thirstString());
     m_sanityLabel->setText(m_stats.sanityString());
     m_restLabel->setText(m_stats.restString());
-
-    if (m_stats.hp() <= 0)
-        emit playerDied();
 }
 
 void GamePage::applyItemEffects(const std::vector<StatChange> &effects)

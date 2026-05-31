@@ -1,5 +1,21 @@
 #include "WorldMap.h"
 
+// =============================================================================
+// WorldMap — 20×∞ procedural world with fog of war
+// =============================================================================
+// Tiles are generated lazily via ensureTile() so the world is virtually
+// infinite. Only tiles within 5 of spawn are pre-generated; the rest spring
+// into existence the first time the player moves adjacent to them.
+//
+// Tile distribution (each tile independently rolled):
+//   34% 平原 (Plain)   — 大树 3-12, difficulty 1.0
+//   33% 山地 (Mountain) — 石头 3-12, difficulty 2.0
+//   33% 农村 (Village)  — 小平房 1-3 + 大树 3-12 + 垃圾桶 1, difficulty 1.0
+//
+// Building interiors are cached per (tileX, tileY, buildingId) and currently
+// always contain exactly one trash can. Container state (opened/not) is
+// persisted through markContainerOpened().
+
 WorldMap::WorldMap(QObject *parent) : QObject(parent)
 {
     generateInitial();

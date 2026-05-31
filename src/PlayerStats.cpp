@@ -3,6 +3,20 @@
 
 #include <algorithm>
 
+// =============================================================================
+// PlayerStats — Five-stat player model with hourly decay & healing
+// =============================================================================
+// Stats: HP, Hunger, Thirst, Sanity, Rest — all clamped [0, 100].
+//
+// applyHourlyTick() runs every in-game hour:
+//   1. Check pre-tick values for healing eligibility
+//      (HP < 100 && hunger > 50 && thirst > 50 && rest > 50)
+//   2. Deduct hunger-2, thirst-2, rest-2 (clamped at 0)
+//   3. Any shortfall from clamping goes to HP damage
+//      e.g. hunger=1 → only loses 1 of 2 → HP gets -1
+//   4. If healing was eligible (step 1), sacrifice hunger-3, thirst-3, rest-3
+//      to heal HP+3
+
 PlayerStats::PlayerStats()
     : m_hp(DefaultMax)
     , m_hunger(DefaultMax)

@@ -1,5 +1,18 @@
 #include "MapElement.h"
 
+// =============================================================================
+// MapElement — TileElement helpers and loot tables
+// =============================================================================
+// TileElement is the fundamental unit on a map tile or inside a building.
+// Each has a type, a per-type sequential id, and interaction state
+// (containerOpened / gathered).
+//
+// Action labels:
+//   Tree       → "砍伐"  60min   guaranteed 3 木板 + 50% bonus 1-3
+//   Stone      → "采集"  60min   guaranteed 3 石子 + 50% bonus 1-3
+//   SmallHouse → "进入"  (opens building interior)
+//   TrashCan   → "搜索"  2min (unopened) / "打开" (opened) 50% 废纸 ×1
+
 QString TileElement::name() const
 {
     switch (type) {

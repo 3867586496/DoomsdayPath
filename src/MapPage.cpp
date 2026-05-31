@@ -1,5 +1,20 @@
 #include "MapPage.h"
 #include "WorldMap.h"
+
+// =============================================================================
+// MapPage — 9×9 overhead grid view of the world
+// =============================================================================
+// Renders a viewport centered on the player. Each cell is a QPushButton
+// coloured by terrain type (平=green, 村=light-green, 山=brown, ?=dark).
+// Clicking an adjacent tile triggers movePlayer → tileEntered.
+//
+// Terrain colours:
+//   Plain   → dark green (#1a3a1a)    text "平"
+//   Village → lighter green (#2a4a1a) text "村"
+//   Mountain→ brown (#3a2a1a)         text "山"
+//   Unknown → near-black (#0a0a1a)    text "?"
+//   Player  → red (#e94560)           text "📍"
+
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QKeyEvent>
