@@ -34,25 +34,37 @@ MapTile &WorldMap::ensureTile(int x, int y)
     t.state = MapTile::Unknown;
 
     auto *rng = QRandomGenerator::global();
-    int r = rng->bounded(100);
-    if (r < 34) {
-        // 平原: 大树 3-12
-        t.type = MapTile::Plain;
-        t.moveDifficulty = 1.0;
+
+    // Roulette-wheel generation based on kTileTypes weights
+    int totalWeight = 0;
+    for (int i = 0; i < kTileTypeCount; ++i)
+        totalWeight += kTileTypes[i].generationWeight;
+    int roll = rng->bounded(totalWeight);
+    int picked = 0;
+    int accum = 0;
+    for (int i = 0; i < kTileTypeCount; ++i) {
+        accum += kTileTypes[i].generationWeight;
+        if (roll < accum) { picked = i; break; }
+    }
+    t.type = static_cast<MapTile::Type>(picked);
+    t.moveDifficulty = kTileTypes[picked].defaultDifficulty;
+
+    // Per-type element generation (still needs per-type logic since
+    // elements are fundamentally different per biome)
+    switch (t.type) {
+    case MapTile::Plain: {
         int trees = rng->bounded(3, 13);
         for (int i = 0; i < trees; ++i)
             t.elements.push_back({MapElementType::Tree, i + 1});
-    } else if (r < 67) {
-        // 山地: 石头 3-12
-        t.type = MapTile::Mountain;
-        t.moveDifficulty = 2.0;
+        break;
+    }
+    case MapTile::Mountain: {
         int rocks = rng->bounded(3, 13);
         for (int i = 0; i < rocks; ++i)
             t.elements.push_back({MapElementType::Stone, i + 1});
-    } else {
-        // 农村: 小平房 1-3, 大树 3-12, 垃圾桶 1
-        t.type = MapTile::Village;
-        t.moveDifficulty = 1.0;
+        break;
+    }
+    case MapTile::Village: {
         int houses = rng->bounded(1, 4);
         for (int i = 0; i < houses; ++i)
             t.elements.push_back({MapElementType::SmallHouse, i + 1});
@@ -60,6 +72,8 @@ MapTile &WorldMap::ensureTile(int x, int y)
         for (int i = 0; i < trees; ++i)
             t.elements.push_back({MapElementType::Tree, i + 1});
         t.elements.push_back({MapElementType::TrashCan, 1});
+        break;
+    }
     }
 
     m_tiles[k] = t;

@@ -150,19 +150,10 @@ QWidget *MapPage::createTileWidget(int mapX, int mapY)
         border = "#111130";
         text = "?";
     } else {
-        if (tile->type == MapTile::Plain) {
-            bg = "#1a3a1a";
-            border = "#2a5a2a";
-            text = QStringLiteral("平");
-        } else if (tile->type == MapTile::Village) {
-            bg = "#2a4a1a";
-            border = "#4a7a2a";
-            text = QStringLiteral("村");
-        } else {
-            bg = "#3a2a1a";
-            border = "#5a3a2a";
-            text = QStringLiteral("山");
-        }
+        auto &info = tileTypeInfo(tile->type);
+        bg = QString::fromUtf8(info.bgHex);
+        border = QString::fromUtf8(info.borderHex);
+        text = QString::fromUtf8(info.icon);
     }
 
     btn->setText(text);
