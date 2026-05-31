@@ -1,5 +1,6 @@
 #include "BackpackPage.h"
 #include "Action.h"
+
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
@@ -7,6 +8,16 @@
 #include <QPushButton>
 #include <QTableWidget>
 #include <QVBoxLayout>
+
+// Shared styles (used in setupUI and refresh)
+static const QString kCellStyle = QStringLiteral(
+    "QLabel{color:#e0e0e0;font-size:14px;padding:2px 6px}");
+static const QString kBtnStyle = QStringLiteral(
+    "QPushButton{background-color:#16213e;color:#c0c0d0;"
+    "border:1px solid #0f3460;border-radius:4px;"
+    "font-size:13px;padding:4px 12px;min-height:28px}"
+    "QPushButton:hover{background-color:#1a2744;"
+    "border-color:#e94560;color:#fff}");
 
 BackpackPage::BackpackPage(QWidget *parent) : QWidget(parent) { setupUI(); }
 
@@ -117,28 +128,19 @@ void BackpackPage::refresh() {
     m_table->setRowCount(0);
     m_table->setRowCount(static_cast<int>(rows.size()));
 
-    QString cellStyle = QStringLiteral(
-        "QLabel{color:#e0e0e0;font-size:14px;padding:2px 6px}");
-    QString btnStyle = QStringLiteral(
-        "QPushButton{background-color:#16213e;color:#c0c0d0;"
-        "border:1px solid #0f3460;border-radius:4px;"
-        "font-size:13px;padding:4px 12px;min-height:28px}"
-        "QPushButton:hover{background-color:#1a2744;"
-        "border-color:#e94560;color:#fff}");
-
     for (int row = 0; row < static_cast<int>(rows.size()); ++row) {
         const Item *item = m_inventory->itemAt(rows[row].firstIdx);
         if (!item) continue;
         int firstIdx = rows[row].firstIdx;
 
         QLabel *nl = new QLabel(item->name());
-        nl->setStyleSheet(cellStyle);
+        nl->setStyleSheet(kCellStyle);
         nl->setWordWrap(true);
         m_table->setCellWidget(row, 0, nl);
 
         QLabel *ql = new QLabel(QString::number(rows[row].qty));
         ql->setAlignment(Qt::AlignCenter);
-        ql->setStyleSheet(cellStyle);
+        ql->setStyleSheet(kCellStyle);
         m_table->setCellWidget(row, 1, ql);
 
         QString funcDesc;
@@ -156,7 +158,7 @@ void BackpackPage::refresh() {
             funcDesc = QStringLiteral("-");
         }
         QLabel *fl = new QLabel(funcDesc);
-        fl->setStyleSheet(cellStyle);
+        fl->setStyleSheet(kCellStyle);
         fl->setWordWrap(true);
         m_table->setCellWidget(row, 2, fl);
 
@@ -168,7 +170,7 @@ void BackpackPage::refresh() {
 
         if (item->isEdible()) {
             QPushButton *be = new QPushButton(QStringLiteral("食用"));
-            be->setStyleSheet(btnStyle);
+            be->setStyleSheet(kBtnStyle);
             be->setCursor(Qt::PointingHandCursor);
             connect(be, &QPushButton::clicked, this,
                     [this, firstIdx]() { onUseItem(firstIdx); });
@@ -176,7 +178,7 @@ void BackpackPage::refresh() {
         }
 
         QPushButton *bd = new QPushButton(QStringLiteral("丢弃"));
-        bd->setStyleSheet(btnStyle);
+        bd->setStyleSheet(kBtnStyle);
         bd->setCursor(Qt::PointingHandCursor);
         connect(bd, &QPushButton::clicked, this,
                 [this, firstIdx]() { onDiscardItem(firstIdx); });
