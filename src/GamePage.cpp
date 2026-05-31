@@ -331,12 +331,7 @@ void GamePage::applyGather(const TileElement &elem)
     auto loot = elementGatherLoot(elem.type);
     bool hasSpace = false;
     for (const auto &entry : loot) {
-        // At least one guaranteed item must be addable
-        Item probe = (entry.itemName == QStringLiteral("木板"))
-            ? Item(QStringLiteral("木板"), QString(), 0.5)
-            : (entry.itemName == QStringLiteral("石子"))
-            ? Item(QStringLiteral("石子"), QString(), 2.0)
-            : Item(QStringLiteral("废纸"), QString(), 0.01);
+        Item probe = makeLootItem(entry.itemName);
         if (m_inventory->canAdd(probe)) {
             hasSpace = true;
             break;
@@ -371,11 +366,7 @@ void GamePage::applyGather(const TileElement &elem)
             qty += rng->bounded(entry.bonusMin, entry.bonusMax + 1);
         }
         for (int i = 0; i < qty; ++i) {
-            Item item = (entry.itemName == QStringLiteral("木板"))
-                ? Item(QStringLiteral("木板"), QStringLiteral("一块厚实的木板"), 0.5)
-                : (entry.itemName == QStringLiteral("石子"))
-                ? Item(QStringLiteral("石子"), QStringLiteral("一块粗糙的石头"), 2.0)
-                : Item(QStringLiteral("废纸"), QStringLiteral("一张废纸"), 0.01);
+            Item item = makeLootItem(entry.itemName);
             if (!m_inventory->addItem(item))
                 invFull = true;
         }

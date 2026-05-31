@@ -4,6 +4,10 @@
 #include <QString>
 #include <vector>
 
+// Required by makeLootItem
+struct Item;
+Item makeLootItem(const QString &lootName);
+
 // Element types on map tiles / inside buildings
 enum class MapElementType {
     None,

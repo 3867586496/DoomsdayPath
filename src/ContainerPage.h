@@ -25,6 +25,10 @@ public:
     void setContainerItems(const std::vector<Item> &items);
     std::vector<Item> containerItems() const { return m_containerItems; }
 
+    // Merge helper: group identical items by name, returns (firstIndex, qty)
+    struct MergeRow { int firstIdx; int qty; };
+    static std::vector<MergeRow> mergeByName(const std::vector<Item> &items);
+
 signals:
     void closed();
     void containerSearched(int tileX, int tileY, int buildingId, int containerId);

@@ -1,4 +1,5 @@
 #include "MapElement.h"
+#include "Item.h"
 
 // =============================================================================
 // MapElement — TileElement helpers and loot tables
@@ -54,4 +55,15 @@ std::vector<GatherLoot> elementGatherLoot(MapElementType type)
     default:
         return {};
     }
+}
+
+Item makeLootItem(const QString &lootName)
+{
+    if (lootName == QStringLiteral("木板"))
+        return Item(lootName, QStringLiteral("一块厚实的木板"), 0.5);
+    if (lootName == QStringLiteral("石子"))
+        return Item(lootName, QStringLiteral("一块粗糙的石头"), 2.0);
+    if (lootName == QStringLiteral("废纸"))
+        return Item(lootName, QStringLiteral("一张废纸"), 0.01);
+    return Item(lootName, {}, 0);
 }
