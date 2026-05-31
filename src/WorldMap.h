@@ -42,6 +42,9 @@ public:
     // Mark a container as opened in cached building interior
     void markContainerOpened(int tileX, int tileY, int buildingId, int containerId);
 
+    // Full world reset — regenerates everything
+    void reset();
+
 public slots:
     void generateInitial();
 

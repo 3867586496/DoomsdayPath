@@ -22,6 +22,7 @@ public:
     bool canAdd(const Item &item) const;
     bool addItem(const Item &item);
     void removeItem(int index);
+    void clear();
     const Item *itemAt(int index) const;
 
 signals:

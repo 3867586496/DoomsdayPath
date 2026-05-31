@@ -35,6 +35,12 @@ void Inventory::removeItem(int index)
     emit changed();
 }
 
+void Inventory::clear()
+{
+    m_items.clear();
+    emit changed();
+}
+
 const Item *Inventory::itemAt(int index) const
 {
     if (index < 0 || index >= static_cast<int>(m_items.size())) return nullptr;

@@ -117,7 +117,10 @@ void MainWindow::setupUI()
     connect(m_newGame, &NewGamePage::backClicked,
             this, &MainWindow::showMainMenu);
     connect(m_newGame, &NewGamePage::startGame, this,
-            [this](const QString &, DifficultyFactor) { showGamePage(); });
+            [this](const QString &, DifficultyFactor) {
+                m_game->resetGame();
+                showGamePage();
+            });
 
     // ---- 游戏页 ----
     connect(m_game, &GamePage::backToMenu,

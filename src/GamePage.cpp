@@ -457,6 +457,9 @@ double GamePage::statValue(StatChange::Target t) const
     return 0;
 }
 
+// =============================================================================
+// Process in-game hours: apply hourly stat ticks for each hour passed
+// =============================================================================
 void GamePage::processHourlyTicks(int minutesPassed)
 {
     int hours = minutesPassed / 60;
@@ -476,4 +479,22 @@ void GamePage::setupTestItems()
         "一块厚实的木板", 0.5));
     m_inventory->addItem(Item(QStringLiteral("石子"),
         "一块粗糙的石头", 2.0));
+}
+
+// =============================================================================
+// Full game state reset — called when starting a new game from main menu
+// =============================================================================
+void GamePage::resetGame()
+{
+    m_stats = PlayerStats();
+    m_time = GameTime();
+    m_inventory->clear();
+    m_inBuilding = false;
+    m_buildingId = 0;
+    m_buildingName.clear();
+    m_currentElements.clear();
+    m_autoSaveInterval = 1;
+    m_map->reset();
+    setupTestItems();
+    refreshTileContext();
 }

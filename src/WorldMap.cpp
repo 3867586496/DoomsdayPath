@@ -203,3 +203,12 @@ void WorldMap::markContainerOpened(int tileX, int tileY,
         }
     }
 }
+
+void WorldMap::reset()
+{
+    m_tiles.clear();
+    m_buildingInteriors.clear();
+    m_playerX = 0;
+    m_playerY = 0;
+    generateInitial();
+}

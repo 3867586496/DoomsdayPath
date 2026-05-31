@@ -83,7 +83,8 @@ void SmallMapPage::refresh()
         return;
     }
 
-    // Count elements by name
+    // Count elements by name (merges identical types — multiple trees
+    // become "大树 | 5", multiple houses become "小平房 | 3")
     QMap<QString, int> counts;
     for (const auto &e : tile->elements)
         counts[e.name()]++;

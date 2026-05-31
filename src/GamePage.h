@@ -44,6 +44,9 @@ public:
     int autoSaveInterval() const { return m_autoSaveInterval; }
     void setAutoSaveInterval(int days) { m_autoSaveInterval = days; }
 
+    // Full state reset — called when starting a new game
+    void resetGame();
+
     // Called by MainWindow when map movement happens — update tile context
     void refreshTileContext();
 
