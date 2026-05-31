@@ -4,37 +4,20 @@
 // =============================================================================
 // MapElement — TileElement helpers and loot tables
 // =============================================================================
-// TileElement is the fundamental unit on a map tile or inside a building.
-// Each has a type, a per-type sequential id, and interaction state
-// (containerOpened / gathered).
-//
-// Action labels:
-//   Tree       → "砍伐"  60min   guaranteed 3 木板 + 50% bonus 1-3
-//   Stone      → "采集"  60min   guaranteed 3 石子 + 50% bonus 1-3
-//   SmallHouse → "进入"  (opens building interior)
-//   TrashCan   → "搜索"  2min (unopened) / "打开" (opened) 50% 废纸 ×1
 
 QString TileElement::name() const
 {
-    switch (type) {
-    case MapElementType::Tree:       return QStringLiteral("大树");
-    case MapElementType::Stone:      return QStringLiteral("石头");
-    case MapElementType::SmallHouse: return QStringLiteral("小平房");
-    case MapElementType::TrashCan:   return QStringLiteral("垃圾桶");
-    default:                         return {};
-    }
+    return QString::fromUtf8(elementInfo(type).name);
 }
 
 QString TileElement::actionLabel() const
 {
-    switch (type) {
-    case MapElementType::Tree:       return QStringLiteral("砍伐");
-    case MapElementType::Stone:      return QStringLiteral("采集");
-    case MapElementType::SmallHouse: return QStringLiteral("进入");
-    case MapElementType::TrashCan:
-        return containerOpened ? QStringLiteral("打开") : QStringLiteral("搜索");
-    default: return {};
-    }
+    auto &info = elementInfo(type);
+    if (isContainer())
+        return containerOpened
+            ? QString::fromUtf8(info.gatheredAction)
+            : QString::fromUtf8(info.ungatheredAction);
+    return QString::fromUtf8(info.ungatheredAction);
 }
 
 std::vector<GatherLoot> elementGatherLoot(MapElementType type)
