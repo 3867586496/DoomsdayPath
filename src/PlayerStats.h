@@ -5,6 +5,13 @@
 #include <vector>
 #include "StatChange.h"
 
+// =============================================================================
+// PlayerStats — array-backed attribute system driven by kStats[] registry
+// =============================================================================
+// Adding a stat requires adding to Stat enum + kStats[] row — see StatChange.h.
+// The class auto-iterates over kStatCount for applyChanges, applyHourlyTick,
+// and display strings.
+
 class PlayerStats
 {
 public:
@@ -12,35 +19,25 @@ public:
 
     PlayerStats();
 
-    double hp() const { return m_hp; }
-    double hunger() const { return m_hunger; }
-    double thirst() const { return m_thirst; }
-    double sanity() const { return m_sanity; }
-    double rest() const { return m_rest; }
+    // Generic access
+    double value(Stat s) const { return m_values[static_cast<int>(s)]; }
+    void modify(Stat s, double delta);
+    QString statString(Stat s) const;
 
-    void modifyHp(double delta);
-    void modifyHunger(double delta);
-    void modifyThirst(double delta);
-    void modifySanity(double delta);
-    void modifyRest(double delta);
+    // Convenience getters (backward-compat)
+    double hp() const     { return value(Stat::Hp); }
+    double hunger() const { return value(Stat::Hunger); }
+    double thirst() const { return value(Stat::Thirst); }
+    double sanity() const { return value(Stat::Sanity); }
+    double rest() const   { return value(Stat::Rest); }
 
+    // Bulk operations (iterates the registry, no switch)
     void applyChanges(const std::vector<StatChange> &changes);
     void applyHourlyTick();
 
-    QString hpString() const;
-    QString hungerString() const;
-    QString thirstString() const;
-    QString sanityString() const;
-    QString restString() const;
-
 private:
-    static double clamp(double value);
-
-    double m_hp;
-    double m_hunger;
-    double m_thirst;
-    double m_sanity;
-    double m_rest;
+    static double clamp(double val);
+    double m_values[kStatCount];
 };
 
 #endif // PLAYERSTATS_H

@@ -85,7 +85,7 @@ private:
     void applyGather(const TileElement &elem);
     void processHourlyTicks(int minutesPassed);
 
-    double statValue(StatChange::Target t) const;
+    double statValue(Stat t) const;
     bool checkStatCosts(const std::vector<StatChange> &costs);
 
     WorldMap *m_map;

@@ -69,7 +69,7 @@ SaveEntry SaveEntry::fromJson(const QJsonObject &obj)
         for (const auto &ev : effArray) {
             QJsonObject eo = ev.toObject();
             effects.push_back({
-                static_cast<StatChange::Target>(eo["target"].toInt()),
+                static_cast<Stat>(eo["target"].toInt()),
                 eo["amount"].toDouble()
             });
         }

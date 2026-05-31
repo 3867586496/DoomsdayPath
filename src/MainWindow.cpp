@@ -282,11 +282,12 @@ void MainWindow::showGamePage()
             if (e.amount >= 0) continue;
             double current = 0;
             switch (e.target) {
-            case StatChange::Hp:      current = m_game->stats().hp(); break;
-            case StatChange::Hunger:  current = m_game->stats().hunger(); break;
-            case StatChange::Thirst:  current = m_game->stats().thirst(); break;
-            case StatChange::Sanity:  current = m_game->stats().sanity(); break;
-            case StatChange::Rest:    current = m_game->stats().rest(); break;
+            case Stat::Hp:      current = m_game->stats().hp(); break;
+            case Stat::Hunger:  current = m_game->stats().hunger(); break;
+            case Stat::Thirst:  current = m_game->stats().thirst(); break;
+            case Stat::Sanity:  current = m_game->stats().sanity(); break;
+            case Stat::Rest:    current = m_game->stats().rest(); break;
+            default: break;
             }
             if (current + e.amount < 0) return false;
         }

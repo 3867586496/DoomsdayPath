@@ -32,7 +32,7 @@ public:
     const std::vector<LootEntry> &loot() const { return m_loot; }
     int timeCostMinutes() const { return m_timeCost; }
 
-    static QString targetName(StatChange::Target t);
+    static QString targetName(Stat t);
 
 private:
     QString m_name;

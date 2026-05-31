@@ -353,8 +353,8 @@ void GamePage::applyGather(const TileElement &elem)
 
     // Gather cost (moderate)
     m_stats.applyChanges({
-        {StatChange::Hunger, -10},
-        {StatChange::Thirst, -5}
+        {Stat::Hunger, -10},
+        {Stat::Thirst, -5}
     });
 
     // Generate loot
@@ -423,11 +423,9 @@ void GamePage::refreshLocationInfo()
 // ---------------------------------------------------------------------------
 void GamePage::refreshStats()
 {
-    m_hpLabel->setText(m_stats.hpString());
-    m_hungerLabel->setText(m_stats.hungerString());
-    m_thirstLabel->setText(m_stats.thirstString());
-    m_sanityLabel->setText(m_stats.sanityString());
-    m_restLabel->setText(m_stats.restString());
+    QLabel *labels[] = { m_hpLabel, m_hungerLabel, m_thirstLabel, m_sanityLabel, m_restLabel };
+    for (int i = 0; i < kStatCount; ++i)
+        labels[i]->setText(m_stats.statString(static_cast<Stat>(i)));
 }
 
 void GamePage::applyItemEffects(const std::vector<StatChange> &effects)
@@ -436,16 +434,9 @@ void GamePage::applyItemEffects(const std::vector<StatChange> &effects)
     refreshStats();
 }
 
-double GamePage::statValue(StatChange::Target t) const
+double GamePage::statValue(Stat t) const
 {
-    switch (t) {
-    case StatChange::Hp:      return m_stats.hp();
-    case StatChange::Hunger:  return m_stats.hunger();
-    case StatChange::Thirst:  return m_stats.thirst();
-    case StatChange::Sanity:  return m_stats.sanity();
-    case StatChange::Rest:    return m_stats.rest();
-    }
-    return 0;
+    return m_stats.value(t);
 }
 
 // =============================================================================
@@ -465,7 +456,7 @@ void GamePage::setupTestItems()
 {
     m_inventory->addItem(Item(QStringLiteral("面包"),
         "一块干硬的面包", 0.1,
-        {{StatChange::Hunger, 10}, {StatChange::Thirst, -5}}, true));
+        {{Stat::Hunger, 10}, {Stat::Thirst, -5}}, true));
     m_inventory->addItem(Item(QStringLiteral("木板"),
         "一块厚实的木板", 0.5));
     m_inventory->addItem(Item(QStringLiteral("石子"),

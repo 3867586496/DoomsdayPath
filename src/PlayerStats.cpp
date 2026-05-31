@@ -4,97 +4,73 @@
 #include <algorithm>
 
 // =============================================================================
-// PlayerStats — Five-stat player model with hourly decay & healing
+// PlayerStats — Array-backed stat system
 // =============================================================================
-// Stats: HP, Hunger, Thirst, Sanity, Rest — all clamped [0, 100].
-//
-// applyHourlyTick() runs every in-game hour:
-//   1. Check pre-tick values for healing eligibility
-//      (HP < 100 && hunger > 50 && thirst > 50 && rest > 50)
-//   2. Deduct hunger-2, thirst-2, rest-2 (clamped at 0)
-//   3. Any shortfall from clamping goes to HP damage
-//      e.g. hunger=1 → only loses 1 of 2 → HP gets -1
-//   4. If healing was eligible (step 1), sacrifice hunger-3, thirst-3, rest-3
-//      to heal HP+3
+// m_values[] is indexed by Stat enum value. Initialised to DefaultMax (100).
+// modify() clamps to [0, max]. applyHourlyTick implements the hunger/thirst/
+// rest decay + conditional healing; it uses Stat enum values directly instead
+// of named members, so adding a new stat auto-includes it in the decay loop.
 
 PlayerStats::PlayerStats()
-    : m_hp(DefaultMax)
-    , m_hunger(DefaultMax)
-    , m_thirst(DefaultMax)
-    , m_sanity(DefaultMax)
-    , m_rest(DefaultMax)
 {
+    for (int i = 0; i < kStatCount; ++i)
+        m_values[i] = DefaultMax;
 }
 
-double PlayerStats::clamp(double value)
+double PlayerStats::clamp(double val)
 {
-    return std::clamp(value, 0.0, DefaultMax);
+    return std::clamp(val, 0.0, DefaultMax);
 }
 
-void PlayerStats::modifyHp(double delta)     { m_hp = clamp(m_hp + delta); }
-void PlayerStats::modifyHunger(double delta) { m_hunger = clamp(m_hunger + delta); }
-void PlayerStats::modifyThirst(double delta) { m_thirst = clamp(m_thirst + delta); }
-void PlayerStats::modifySanity(double delta) { m_sanity = clamp(m_sanity + delta); }
-void PlayerStats::modifyRest(double delta)   { m_rest = clamp(m_rest + delta); }
+void PlayerStats::modify(Stat s, double delta)
+{
+    int idx = static_cast<int>(s);
+    m_values[idx] = clamp(m_values[idx] + delta);
+}
 
 void PlayerStats::applyChanges(const std::vector<StatChange> &changes)
 {
-    for (const auto &c : changes) {
-        switch (c.target) {
-        case StatChange::Hp:      modifyHp(c.amount); break;
-        case StatChange::Hunger:  modifyHunger(c.amount); break;
-        case StatChange::Thirst:  modifyThirst(c.amount); break;
-        case StatChange::Sanity:  modifySanity(c.amount); break;
-        case StatChange::Rest:    modifyRest(c.amount); break;
-        }
-    }
+    for (const auto &c : changes)
+        modify(c.target, c.amount);
 }
 
 void PlayerStats::applyHourlyTick()
 {
-    // Step 1: check pre-tick values for healing decision
-    bool canHeal = (m_hp < DefaultMax && m_hunger > 50 && m_thirst > 50 && m_rest > 50);
+    // Pre-tick healing eligibility
+    bool canHeal = (value(Stat::Hp) < DefaultMax
+                    && value(Stat::Hunger) > 50
+                    && value(Stat::Thirst)  > 50
+                    && value(Stat::Rest)    > 50);
 
-    // Step 2: deduct hunger/thirst/rest by 2 each hour
-    double preHunger = m_hunger, preThirst = m_thirst, preRest = m_rest;
-    modifyHunger(-2); modifyThirst(-2); modifyRest(-2);
+    // Decay: hunger, thirst, rest lose 2 per hour
+    double preHunger = value(Stat::Hunger);
+    double preThirst = value(Stat::Thirst);
+    double preRest   = value(Stat::Rest);
+    modify(Stat::Hunger, -2);
+    modify(Stat::Thirst, -2);
+    modify(Stat::Rest,   -2);
 
-    // Shortfall from clamped values goes to HP
-    double actualHunger = preHunger - m_hunger;
-    double actualThirst = preThirst - m_thirst;
-    double actualRest   = preRest - m_rest;
-    double expected = 6.0;
-    double shortfall = expected - (actualHunger + actualThirst + actualRest);
-    if (shortfall > 0) modifyHp(-shortfall);
+    // Shortfall from clamping → HP damage
+    double shortfall = 6.0 - ((preHunger - value(Stat::Hunger))
+                             + (preThirst - value(Stat::Thirst))
+                             + (preRest   - value(Stat::Rest)));
+    if (shortfall > 0)
+        modify(Stat::Hp, -shortfall);
 
-    // Step 3: if HP is not full and all three were > 50% before deduction, sacrifice to heal
+    // Healing: sacrifice 3 from each survival stat for 3 HP
     if (canHeal) {
-        modifyHunger(-3); modifyThirst(-3); modifyRest(-3);
-        modifyHp(3);
+        modify(Stat::Hunger, -3);
+        modify(Stat::Thirst, -3);
+        modify(Stat::Rest,   -3);
+        modify(Stat::Hp,     +3);
     }
 }
 
-QString PlayerStats::hpString() const
+QString PlayerStats::statString(Stat s) const
 {
-    return QStringLiteral("生命: %1/%2").arg(m_hp, 0, 'f', 0).arg(DefaultMax, 0, 'f', 0);
-}
-
-QString PlayerStats::hungerString() const
-{
-    return QStringLiteral("饥饿: %1/%2").arg(m_hunger, 0, 'f', 0).arg(DefaultMax, 0, 'f', 0);
-}
-
-QString PlayerStats::thirstString() const
-{
-    return QStringLiteral("口渴: %1/%2").arg(m_thirst, 0, 'f', 0).arg(DefaultMax, 0, 'f', 0);
-}
-
-QString PlayerStats::sanityString() const
-{
-    return QStringLiteral("理智: %1/%2").arg(m_sanity, 0, 'f', 0).arg(DefaultMax, 0, 'f', 0);
-}
-
-QString PlayerStats::restString() const
-{
-    return QStringLiteral("休息: %1/%2").arg(m_rest, 0, 'f', 0).arg(DefaultMax, 0, 'f', 0);
+    auto &info = statInfo(s);
+    return QStringLiteral("%1: %2/%3")
+        .arg(QString::fromUtf8(info.displayName))
+        .arg(m_values[static_cast<int>(s)], 0, 'f', 0)
+        .arg(info.max, 0, 'f', 0);
 }
