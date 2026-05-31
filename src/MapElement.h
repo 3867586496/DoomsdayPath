@@ -2,10 +2,12 @@
 #define MAPELEMENT_H
 
 #include <QString>
+#include <QRandomGenerator>
 #include <vector>
 
 // Required by makeLootItem
-struct Item;
+#include "Item.h"
+
 Item makeLootItem(const QString &lootName);
 
 // =============================================================================
@@ -77,5 +79,19 @@ struct GatherLoot {
 };
 
 std::vector<GatherLoot> elementGatherLoot(MapElementType type);
+
+// Roll the loot table for a given element type and push results into 'out'.
+// Used by both GamePage::applyGather and ContainerPage search handler.
+inline void rollGatherLoot(MapElementType type, std::vector<Item> &out) {
+    auto loot = elementGatherLoot(type);
+    auto *rng = QRandomGenerator::global();
+    for (const auto &entry : loot) {
+        int qty = entry.guaranteed;
+        if (entry.bonusChance > 0 && rng->bounded(100) < entry.bonusChance)
+            qty += rng->bounded(entry.bonusMin, entry.bonusMax + 1);
+        for (int i = 0; i < qty; ++i)
+            out.push_back(makeLootItem(entry.itemName));
+    }
+}
 
 #endif // MAPELEMENT_H

@@ -51,6 +51,13 @@ private slots:
 
 private:
     void setupUI();
+    void createPages();
+    void wireMenuConnections();
+    void wireGameConnections();
+    void wireBackpackConnections();
+    void wireSettingsConnections();
+    void wireGameMenuConnections();
+    void wireMapConnections();
 
     QStackedWidget *m_stack = nullptr;
     MainMenuPage *m_mainMenu = nullptr;

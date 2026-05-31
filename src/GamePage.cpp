@@ -21,7 +21,6 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QRandomGenerator>
 #include <QTableWidget>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -357,19 +356,13 @@ void GamePage::applyGather(const TileElement &elem)
         {Stat::Thirst, -5}
     });
 
-    // Generate loot
+    // Generate loot — roll dice and add items to inventory
+    std::vector<Item> rolled;
+    rollGatherLoot(elem.type, rolled);
     bool invFull = false;
-    auto *rng = QRandomGenerator::global();
-    for (const auto &entry : loot) {
-        int qty = entry.guaranteed;
-        if (entry.bonusChance > 0 && rng->bounded(100) < entry.bonusChance) {
-            qty += rng->bounded(entry.bonusMin, entry.bonusMax + 1);
-        }
-        for (int i = 0; i < qty; ++i) {
-            Item item = makeLootItem(entry.itemName);
-            if (!m_inventory->addItem(item))
-                invFull = true;
-        }
+    for (auto &item : rolled) {
+        if (!m_inventory->addItem(item))
+            invFull = true;
     }
 
     if (invFull) {

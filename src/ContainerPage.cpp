@@ -17,7 +17,6 @@
 #include <QHeaderView>
 #include <QLabel>
 #include <QPushButton>
-#include <QRandomGenerator>
 #include <QTableWidget>
 #include <QVBoxLayout>
 #include <functional>
@@ -131,15 +130,7 @@ void ContainerPage::setupUI()
 
     connect(m_btnSearch, &QPushButton::clicked, this, [this]() {
         m_btnSearch->setVisible(false);
-        auto loot = elementGatherLoot(m_container.type);
-        auto *rng = QRandomGenerator::global();
-        for (const auto &entry : loot) {
-            int qty = entry.guaranteed;
-            if (entry.bonusChance > 0 && rng->bounded(100) < entry.bonusChance)
-                qty += rng->bounded(entry.bonusMin, entry.bonusMax + 1);
-            for (int i = 0; i < qty; ++i)
-                m_containerItems.push_back(makeLootItem(entry.itemName));
-        }
+        rollGatherLoot(m_container.type, m_containerItems);
         emit containerSearched(m_containerTileX, m_containerTileY,
                                m_buildingId, m_container.id);
         refresh();
