@@ -183,9 +183,6 @@ bool GamePage::checkConditions(const Action &action)
 
 void GamePage::processHourlyTicks(int minutesPassed)
 {
-    if (m_time.hour() < 0) {  // GameTime starts at hour 6 day 1, no tick yet
-        // Only process ticks after actions actually advance time
-    }
     int hours = minutesPassed / 60;
     for (int i = 0; i < hours; ++i)
         m_stats.applyHourlyTick();
@@ -290,9 +287,12 @@ void GamePage::onActionClicked(const Action &action)
     m_time.advance(action.timeCostMinutes());
     refreshStats();
 
-    if ((oldDay < m_time.day()) ||
-        (oldDay == m_time.day() && oldHour < 6 && m_time.hour() >= 6)) {
-        emit autoSaveTriggered();
+    // Auto-save check: fires every N days based on interval setting
+    if (m_autoSaveInterval > 0) {
+        int oldCycle = (oldDay - 1) / m_autoSaveInterval;
+        int newCycle = (m_time.day() - 1) / m_autoSaveInterval;
+        if (oldCycle < newCycle)
+            emit autoSaveTriggered();
     }
 }
 

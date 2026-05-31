@@ -146,7 +146,7 @@ bool SaveSystem::saveEntry(const QString &folderName, const SaveEntry &entry)
         for (const auto &e : existing) {
             if (e.isAuto) autoCount++;
         }
-        if (autoCount >= MaxAutoSaves) {
+        if (autoCount >= m_maxAutoSaves) {
             // Delete oldest auto save
             QDir dir(folderPath(folderName));
             QStringList autoFiles = dir.entryList({"auto_*.json"}, QDir::Files, QDir::Name);

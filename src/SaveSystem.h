@@ -35,9 +35,12 @@ class SaveSystem : public QObject
     Q_OBJECT
 
 public:
-    static constexpr int MaxAutoSaves = 5;
+    static constexpr int DefaultMaxAutoSaves = 5;
 
     explicit SaveSystem(QObject *parent = nullptr);
+
+    int maxAutoSaves() const { return m_maxAutoSaves; }
+    void setMaxAutoSaves(int n) { m_maxAutoSaves = qMax(1, n); }
 
     // List all save folders (big folders containing individual saves)
     QStringList saveFolderNames() const;
@@ -66,6 +69,7 @@ signals:
 private:
     QString folderPath(const QString &folderName) const;
     void ensureDir(const QString &path) const;
+    int m_maxAutoSaves = DefaultMaxAutoSaves;
 };
 
 #endif // SAVESYSTEM_H

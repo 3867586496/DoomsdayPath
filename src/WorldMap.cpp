@@ -75,8 +75,7 @@ int WorldMap::moveCostBetween(int x1, int y1, int x2, int y2) const
 {
     auto *a = tileAt(x1, y1);
     if (!a) return 60; // default: 1.0 * 2 * 30
-    // Generate target tile if it doesn't exist, then get its difficulty
-    auto *b = const_cast<WorldMap*>(this)->tileAt(x2, y2);
+    auto *b = tileAt(x2, y2);
     double db = b ? b->moveDifficulty : 1.0;
     return static_cast<int>((a->moveDifficulty + db) * 30);
 }

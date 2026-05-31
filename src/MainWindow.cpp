@@ -116,6 +116,7 @@ void MainWindow::setupUI()
         entry.hunger = m_game->stats().hunger();
         entry.thirst = m_game->stats().thirst();
         entry.sanity = m_game->stats().sanity();
+        entry.rest = m_game->stats().rest();
         entry.timestamp = QDateTime::currentDateTime();
         entry.isAuto = true;
         auto *inv = m_game->inventory();
@@ -139,6 +140,11 @@ void MainWindow::setupUI()
             this, [this](bool fs) {
                 if (fs) showFullScreen(); else showNormal();
                 showMainMenu();
+            });
+    connect(m_settings, &SettingsPage::autoSaveSettingsChanged,
+            this, [this](int interval, int count) {
+                m_game->setAutoSaveInterval(interval);
+                m_saveSystem->setMaxAutoSaves(count);
             });
 
     // ---- 游戏菜单 ----

@@ -26,6 +26,10 @@ public:
         m_time.advance(minutes);
         refreshStats();
     }
+
+    int autoSaveInterval() const { return m_autoSaveInterval; }
+    void setAutoSaveInterval(int days) { m_autoSaveInterval = days; }
+
 public slots:
     void applyItemEffects(const std::vector<StatChange> &effects);
 
@@ -65,6 +69,7 @@ private:
 
     QVBoxLayout *m_actionLayout = nullptr;
     QWidget *m_testArea = nullptr;
+    int m_autoSaveInterval = 1;  // days, default 1
 };
 
 #endif // GAMEPAGE_H

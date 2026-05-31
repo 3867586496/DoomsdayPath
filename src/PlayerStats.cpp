@@ -38,7 +38,10 @@ void PlayerStats::applyChanges(const std::vector<StatChange> &changes)
 
 void PlayerStats::applyHourlyTick()
 {
-    // Step 1: deduct hunger/thirst/rest by 2 each hour
+    // Step 1: check pre-tick values for healing decision
+    bool canHeal = (m_hp < DefaultMax && m_hunger > 50 && m_thirst > 50 && m_rest > 50);
+
+    // Step 2: deduct hunger/thirst/rest by 2 each hour
     double preHunger = m_hunger, preThirst = m_thirst, preRest = m_rest;
     modifyHunger(-2); modifyThirst(-2); modifyRest(-2);
 
@@ -50,8 +53,8 @@ void PlayerStats::applyHourlyTick()
     double shortfall = expected - (actualHunger + actualThirst + actualRest);
     if (shortfall > 0) modifyHp(-shortfall);
 
-    // Step 2: if HP is not full and all three > 50%, sacrifice to heal
-    if (m_hp < DefaultMax && m_hunger > 50 && m_thirst > 50 && m_rest > 50) {
+    // Step 3: if HP is not full and all three were > 50% before deduction, sacrifice to heal
+    if (canHeal) {
         modifyHunger(-3); modifyThirst(-3); modifyRest(-3);
         modifyHp(3);
     }

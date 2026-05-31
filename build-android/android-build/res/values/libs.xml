@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<resources>
+    <array name="bundled_libs">
+        <item>Qt6Core_arm64-v8a</item>
+        <item>Qt6Gui_arm64-v8a</item>
+        <item>Qt6Widgets_arm64-v8a</item>
+    </array>
+    <array name="qt_libs">
+        <item>Qt6Core_arm64-v8a</item>
+        <item>Qt6Gui_arm64-v8a</item>
+        <item>Qt6Widgets_arm64-v8a</item>
+    </array>
+</resources>
