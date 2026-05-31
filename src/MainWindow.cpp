@@ -193,6 +193,11 @@ void MainWindow::setupUI()
             this, &MainWindow::showGamePage);
     connect(m_mapPage, &MapPage::tileEntered, this,
             [this](int, int, int cost) {
+                if (m_game->isIndoor()) {
+                    QMessageBox::information(this, QStringLiteral("无法移动"),
+                        QStringLiteral("在建筑内无法在大地图上移动"));
+                    return;
+                }
                 m_game->advanceTime(cost);
                 m_game->refreshTileContext();
             });
