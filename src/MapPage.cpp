@@ -139,6 +139,10 @@ QWidget *MapPage::createTileWidget(int mapX, int mapY)
             bg = "#1a3a1a";
             border = "#2a5a2a";
             text = QStringLiteral("平");
+        } else if (tile->type == MapTile::Village) {
+            bg = "#2a4a1a";
+            border = "#4a7a2a";
+            text = QStringLiteral("村");
         } else {
             bg = "#3a2a1a";
             border = "#5a3a2a";
