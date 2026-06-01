@@ -37,6 +37,21 @@ GamePage::GamePage(WorldMap *map, QWidget *parent)
     setupTestItems();
 }
 
+// ---- Helpers ---------------------------------------------------------------
+static QLabel *makeStyledLabel(const QString &style, QWidget *parent) {
+    auto *l = new QLabel(parent);
+    l->setStyleSheet(style);
+    return l;
+}
+
+static QPushButton *makeNavBtn(const QString &text, const QString &style,
+                                QWidget *parent) {
+    auto *b = new QPushButton(text, parent);
+    b->setStyleSheet(style);
+    b->setCursor(Qt::PointingHandCursor);
+    return b;
+}
+
 // ---------------------------------------------------------------------------
 // UI Setup
 // ---------------------------------------------------------------------------
@@ -54,11 +69,11 @@ void GamePage::setupUI()
     const QString statStyle = QStringLiteral(
         "QLabel{color:#e0e0e0;font-size:15px;font-family:monospace}");
 
-    m_hpLabel    = new QLabel(this); m_hpLabel->setStyleSheet(statStyle);
-    m_hungerLabel = new QLabel(this); m_hungerLabel->setStyleSheet(statStyle);
-    m_thirstLabel = new QLabel(this); m_thirstLabel->setStyleSheet(statStyle);
-    m_sanityLabel = new QLabel(this); m_sanityLabel->setStyleSheet(statStyle);
-    m_restLabel  = new QLabel(this); m_restLabel->setStyleSheet(statStyle);
+    m_hpLabel    = makeStyledLabel(statStyle, this);
+    m_hungerLabel = makeStyledLabel(statStyle, this);
+    m_thirstLabel = makeStyledLabel(statStyle, this);
+    m_sanityLabel = makeStyledLabel(statStyle, this);
+    m_restLabel  = makeStyledLabel(statStyle, this);
 
     statsBox->addWidget(m_hpLabel);
     statsBox->addWidget(m_hungerLabel);
@@ -78,8 +93,8 @@ void GamePage::setupUI()
 
     m_timeLabel = new QLabel(this); m_timeLabel->setStyleSheet(
         "QLabel{color:#e94560;font-size:16px;font-weight:bold;font-family:monospace}");
-    m_tileLabel = new QLabel(this); m_tileLabel->setStyleSheet(locStyle);
-    m_locLabel  = new QLabel(this); m_locLabel->setStyleSheet(locStyle);
+    m_tileLabel = makeStyledLabel(locStyle, this);
+    m_locLabel  = makeStyledLabel(locStyle, this);
 
     locBox->addWidget(m_timeLabel, 0, Qt::AlignRight);
     locBox->addWidget(m_tileLabel, 0, Qt::AlignRight);
@@ -123,17 +138,9 @@ void GamePage::setupUI()
         "font-size:14px;padding:8px 16px;min-width:80px}"
         "QPushButton:hover{background-color:#0f3460;color:#ffffff;border-color:#e94560}");
 
-    m_btnBigMap = new QPushButton(QStringLiteral("大地图"), this);
-    m_btnBigMap->setStyleSheet(navBtnStyle);
-    m_btnBigMap->setCursor(Qt::PointingHandCursor);
-
-    m_btnSmallMap = new QPushButton(QStringLiteral("小地图"), this);
-    m_btnSmallMap->setStyleSheet(navBtnStyle);
-    m_btnSmallMap->setCursor(Qt::PointingHandCursor);
-
-    m_btnBackpack = new QPushButton(QStringLiteral("背包"), this);
-    m_btnBackpack->setStyleSheet(navBtnStyle);
-    m_btnBackpack->setCursor(Qt::PointingHandCursor);
+    m_btnBigMap   = makeNavBtn(QStringLiteral("大地图"),   navBtnStyle, this);
+    m_btnSmallMap = makeNavBtn(QStringLiteral("小地图"),   navBtnStyle, this);
+    m_btnBackpack = makeNavBtn(QStringLiteral("背包"),     navBtnStyle, this);
 
     bottomRow->addWidget(m_btnBigMap);
     bottomRow->addWidget(m_btnSmallMap);

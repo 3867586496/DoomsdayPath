@@ -1,5 +1,6 @@
 #include "SavePage.h"
 #include "SaveSystem.h"
+
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QInputDialog>
@@ -8,6 +9,15 @@
 #include <QPushButton>
 #include <QTableWidget>
 #include <QVBoxLayout>
+
+static const QString kCellStyle = QStringLiteral(
+    "QLabel{color:#e0e0e0;font-size:14px;padding:4px 8px}");
+static const QString kBtnStyle = QStringLiteral(
+    "QPushButton{background-color:#16213e;color:#c0c0d0;"
+    "border:1px solid #0f3460;border-radius:4px;"
+    "font-size:13px;padding:4px 12px;min-height:28px}"
+    "QPushButton:hover{background-color:#1a2744;"
+    "border-color:#e94560;color:#fff}");
 
 SavePage::SavePage(SaveSystem *saveSystem, QWidget *parent)
     : QWidget(parent), m_saveSystem(saveSystem)
@@ -94,25 +104,15 @@ void SavePage::refreshList()
 
 void SavePage::populateRow(int row, const QString &folderName)
 {
-    QString cellStyle = QStringLiteral(
-        "QLabel{color:#e0e0e0;font-size:14px;padding:4px 8px}");
-
     QLabel *nl = new QLabel(folderName);
-    nl->setStyleSheet(cellStyle);
+    nl->setStyleSheet(kCellStyle);
     nl->setWordWrap(true);
     m_table->setCellWidget(row, 0, nl);
 
     SaveEntry latest = m_saveSystem->latestEntry(folderName);
     QLabel *dl = new QLabel(latest.timestamp.toString("yyyy-MM-dd HH:mm"));
-    dl->setStyleSheet(cellStyle);
+    dl->setStyleSheet(kCellStyle);
     m_table->setCellWidget(row, 1, dl);
-
-    QString btnStyle = QStringLiteral(
-        "QPushButton{background-color:#16213e;color:#c0c0d0;"
-        "border:1px solid #0f3460;border-radius:4px;"
-        "font-size:13px;padding:4px 12px;min-height:28px}"
-        "QPushButton:hover{background-color:#1a2744;"
-        "border-color:#e94560;color:#fff}");
 
     QWidget *aw = new QWidget();
     aw->setMinimumHeight(48);
@@ -122,14 +122,14 @@ void SavePage::populateRow(int row, const QString &folderName)
     al->addStretch();
 
     QPushButton *btnOvw = new QPushButton(QStringLiteral("覆盖"));
-    btnOvw->setStyleSheet(btnStyle);
+    btnOvw->setStyleSheet(kBtnStyle);
     btnOvw->setCursor(Qt::PointingHandCursor);
     connect(btnOvw, &QPushButton::clicked, this,
             [this, folderName]() { onOverwrite(folderName); });
     al->addWidget(btnOvw);
 
     QPushButton *btnDel = new QPushButton(QStringLiteral("删除"));
-    btnDel->setStyleSheet(btnStyle);
+    btnDel->setStyleSheet(kBtnStyle);
     btnDel->setCursor(Qt::PointingHandCursor);
     connect(btnDel, &QPushButton::clicked, this,
             [this, folderName]() { onDeleteFolder(folderName); });
