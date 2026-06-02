@@ -1,18 +1,12 @@
 #include "ContainerPage.h"
 #include "MapElement.h"
+#include "style.h"
 
 // =============================================================================
 // ContainerPage — Backpack ↔ Container transfer UI
 // =============================================================================
-// Two-table split layout: left = backpack items, right = container items.
-// Each table merges identical items into one row (name | qty | fn | btn).
-//
-// Transfer flow: click btn → onTransferToXxx() removes from source, adds to
-// dest, emits signal for MainWindow to sync game inventory, then refresh().
-//
-// Item persistence: container items cached in MainWindow, restored via
-// setContainerItems().
 
+#include <functional>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
@@ -45,16 +39,18 @@ ContainerPage::mergeByName(const std::vector<Item> &items)
 
 // Shared transfer button style (used in both tables)
 static const QString kBtnStyle = QStringLiteral(
-    "QPushButton{background-color:#16213e;color:#c0c0d0;"
-    "border:1px solid #0f3460;border-radius:4px;font-size:13px;padding:4px 10px}"
-    "QPushButton:hover{background-color:#0f3460;color:#fff;border-color:#e94560}");
+    "QPushButton{background-color:%1;color:%2;"
+    "border:1px solid %3;border-radius:6px;font-size:13px;padding:4px 12px}"
+    "QPushButton:hover{background-color:%1;color:white;border-color:%4}")
+    .arg(Style::kPanelBg, Style::kText, Style::kBorder, Style::kAccent);
 
-// Shared table style
+// Shared tables style
 static const QString kTableStyle = QStringLiteral(
-    "QTableWidget{background-color:#0f0f1a;color:#e0e0e0;"
-    "gridline-color:#1a1a2e;border:1px solid #1a1a2e;font-size:13px}"
-    "QHeaderView::section{background-color:#16213e;color:#c0c0d0;"
-    "border:none;padding:4px;font-weight:bold}");
+    "QTableWidget{background-color:%1;color:%2;"
+    "gridline-color:%3;border:1px solid %3;border-radius:8px;font-size:13px}"
+    "QHeaderView::section{background-color:%1;color:%4;"
+    "border:none;padding:6px;font-weight:bold}")
+    .arg(Style::kPanelBg, Style::kText, Style::kBorder, Style::kAccent);
 
 // ---- Construction -----------------------------------------------------------
 
@@ -99,14 +95,16 @@ void ContainerPage::setupUI()
     m_titleLabel = new QLabel(this);
     m_titleLabel->setAlignment(Qt::AlignCenter);
     m_titleLabel->setStyleSheet(QStringLiteral(
-        "QLabel{color:#e94560;font-size:22px;font-weight:bold;padding:8px}"));
+        "QLabel{color:%1;font-size:22px;font-weight:bold;padding:8px}")
+        .arg(Style::kAccent));
     outer->addWidget(m_titleLabel);
 
     m_btnSearch = new QPushButton(QStringLiteral("搜索容器"), this);
     m_btnSearch->setStyleSheet(QStringLiteral(
-        "QPushButton{background-color:#e94560;color:#fff;border:none;"
-        "border-radius:6px;font-size:16px;padding:10px 30px}"
-        "QPushButton:hover{background-color:#ff6b81}"));
+        "QPushButton{background-color:%1;color:white;border:none;"
+        "border-radius:8px;font-size:16px;padding:10px 30px}"
+        "QPushButton:hover{background-color:%2}")
+        .arg(Style::kAccent, Style::kAccentH));
     m_btnSearch->setCursor(Qt::PointingHandCursor);
     m_btnSearch->setVisible(false);
     outer->addWidget(m_btnSearch, 0, Qt::AlignCenter);
@@ -118,10 +116,11 @@ void ContainerPage::setupUI()
 
     m_btnReturn = new QPushButton(QStringLiteral("返回"), this);
     m_btnReturn->setStyleSheet(QStringLiteral(
-        "QPushButton{background-color:#16213e;color:#c0c0d0;"
-        "border:1px solid #0f3460;border-radius:6px;"
+        "QPushButton{background-color:%1;color:%2;"
+        "border:1px solid %3;border-radius:8px;"
         "font-size:16px;padding:10px 40px}"
-        "QPushButton:hover{background-color:#0f3460;color:#fff;border-color:#e94560}"));
+        "QPushButton:hover{background-color:%1;color:white;border-color:%4}")
+        .arg(Style::kPanelBg, Style::kText, Style::kBorder, Style::kAccent));
     m_btnReturn->setCursor(Qt::PointingHandCursor);
     outer->addWidget(m_btnReturn, 0, Qt::AlignCenter);
 
