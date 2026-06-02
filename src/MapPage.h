@@ -30,14 +30,18 @@ private slots:
 
 private:
     void setupUI();
-    void updateTileButton(int gridRow, int gridCol, int mapX, int mapY);
-    QWidget *createTileWidget(int mapX, int mapY);
+    void updateTileButton(int col, int row, int mapX, int mapY);
 
     WorldMap *m_map;
     QGridLayout *m_gridLayout;
     QLabel *m_infoLabel;
 
-    static constexpr int ViewRadius = 4;
+    // Pre-created widgets — reused on every refresh for performance
+    QPushButton *m_tiles[9][9] = {};
+    QLabel *m_colHeaders[9] = {};
+    QLabel *m_rowHeaders[9] = {};
+
+    static constexpr int ViewRadius = 4;   // 9×9 viewport
     static constexpr int CellSize = 64;
 };
 
