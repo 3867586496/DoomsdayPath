@@ -1,8 +1,14 @@
+// =============================================================================
+// MainMenuPage — title screen with logo, subtitle, and navigation buttons
+// =============================================================================
+
 #include "MainMenuPage.h"
+#include "style.h"
 
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QSpacerItem>
 
 MainMenuPage::MainMenuPage(QWidget *parent)
     : QWidget(parent)
@@ -12,76 +18,72 @@ MainMenuPage::MainMenuPage(QWidget *parent)
 
 void MainMenuPage::setupUI()
 {
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setAlignment(Qt::AlignCenter);
+    auto *root = new QVBoxLayout(this);
+    root->setAlignment(Qt::AlignCenter);
 
-    layout->addStretch(3);
+    // -- Logo area ------------------------------------------------------------
+    root->addStretch(2);
 
-    // 标题
-    m_titleLabel = new QLabel(QStringLiteral("末日迷途"), this);
-    m_titleLabel->setAlignment(Qt::AlignCenter);
-    m_titleLabel->setStyleSheet(QStringLiteral(
-        "QLabel {"
-        "  color: #e94560;"
-        "  font-size: 48px;"
-        "  font-weight: bold;"
-        "  padding: 20px;"
-        "}"
-    ));
-    layout->addWidget(m_titleLabel);
+    auto *logoIcon = new QLabel(QStringLiteral("🎒"), this);
+    logoIcon->setAlignment(Qt::AlignCenter);
+    logoIcon->setStyleSheet("font-size:72px; background:transparent;");
+    root->addWidget(logoIcon, 0, Qt::AlignCenter);
 
-    layout->addSpacing(40);
+    root->addSpacing(12);
 
-    // 按钮样式模板
-    const QString buttonStyle = QStringLiteral(
-        "QPushButton {"
-        "  background-color: #16213e;"
-        "  color: #e0e0e0;"
-        "  border: 2px solid #0f3460;"
-        "  border-radius: 8px;"
-        "  font-size: 20px;"
-        "  padding: 12px 40px;"
-        "  min-width: 200px;"
-        "}"
-        "QPushButton:hover {"
-        "  background-color: #0f3460;"
-        "  border-color: #e94560;"
-        "}"
-        "QPushButton:pressed {"
-        "  background-color: #533483;"
-        "}"
-    );
+    auto *title = new QLabel(QStringLiteral("末日迷途"), this);
+    title->setAlignment(Qt::AlignCenter);
+    title->setStyleSheet(QStringLiteral(
+        "font-size:52px; font-weight:bold; color:%1; background:transparent;"
+        "letter-spacing:12px;").arg(Style::kAccent));
+    root->addWidget(title, 0, Qt::AlignCenter);
 
-    m_btnStart = new QPushButton(QStringLiteral("开始游戏"), this);
-    m_btnStart->setStyleSheet(buttonStyle);
-    m_btnStart->setCursor(Qt::PointingHandCursor);
-    layout->addWidget(m_btnStart, 0, Qt::AlignCenter);
+    auto *subtitle = new QLabel(QStringLiteral("废墟中，一只背包醒了过来"), this);
+    subtitle->setAlignment(Qt::AlignCenter);
+    subtitle->setStyleSheet(QStringLiteral(
+        "font-size:16px; color:%1; background:transparent; padding-bottom:8px;")
+        .arg(Style::kTextDim));
+    root->addWidget(subtitle, 0, Qt::AlignCenter);
 
-    layout->addSpacing(16);
+    root->addSpacing(48);
 
-    m_btnLoad = new QPushButton(QStringLiteral("读取游戏"), this);
-    m_btnLoad->setStyleSheet(buttonStyle);
-    m_btnLoad->setCursor(Qt::PointingHandCursor);
-    layout->addWidget(m_btnLoad, 0, Qt::AlignCenter);
+    // -- Buttons --------------------------------------------------------------
+    const QString btn = Style::kMenuBtn
+        .arg(Style::kText, Style::kBorder, Style::kAccent, Style::kAccentP);
 
-    layout->addSpacing(16);
+    auto makeBtn = [&](const QString &label, const QString &icon) -> QPushButton* {
+        auto *b = new QPushButton(QString("%1  %2").arg(icon, label), this);
+        b->setStyleSheet(btn);
+        b->setCursor(Qt::PointingHandCursor);
+        return b;
+    };
 
-    m_btnSettings = new QPushButton(QStringLiteral("设置"), this);
-    m_btnSettings->setStyleSheet(buttonStyle);
-    m_btnSettings->setCursor(Qt::PointingHandCursor);
-    layout->addWidget(m_btnSettings, 0, Qt::AlignCenter);
+    m_btnStart    = makeBtn(QStringLiteral("开始游戏"), "▶");
+    m_btnLoad     = makeBtn(QStringLiteral("继续旅程"), "📂");
+    m_btnSettings = makeBtn(QStringLiteral("设    置"), "⚙");
+    m_btnExit     = makeBtn(QStringLiteral("离开废墟"), "🚪");
 
-    layout->addSpacing(16);
+    const int btnSpacing = 14;
+    root->addWidget(m_btnStart,    0, Qt::AlignCenter);
+    root->addSpacing(btnSpacing);
+    root->addWidget(m_btnLoad,     0, Qt::AlignCenter);
+    root->addSpacing(btnSpacing);
+    root->addWidget(m_btnSettings, 0, Qt::AlignCenter);
+    root->addSpacing(btnSpacing);
+    root->addWidget(m_btnExit,     0, Qt::AlignCenter);
 
-    m_btnExit = new QPushButton(QStringLiteral("退出游戏"), this);
-    m_btnExit->setStyleSheet(buttonStyle);
-    m_btnExit->setCursor(Qt::PointingHandCursor);
-    layout->addWidget(m_btnExit, 0, Qt::AlignCenter);
+    root->addStretch(3);
 
-    layout->addStretch(4);
+    // Version tag
+    auto *ver = new QLabel(QStringLiteral("v0.8.0"), this);
+    ver->setAlignment(Qt::AlignCenter);
+    ver->setStyleSheet(QStringLiteral(
+        "font-size:11px; color:%1; background:transparent;").arg(Style::kTextDim));
+    root->addWidget(ver, 0, Qt::AlignCenter);
+    root->addSpacing(12);
 
-    connect(m_btnStart, &QPushButton::clicked, this, &MainMenuPage::startGameClicked);
-    connect(m_btnLoad, &QPushButton::clicked, this, &MainMenuPage::loadGameClicked);
+    connect(m_btnStart,    &QPushButton::clicked, this, &MainMenuPage::startGameClicked);
+    connect(m_btnLoad,     &QPushButton::clicked, this, &MainMenuPage::loadGameClicked);
     connect(m_btnSettings, &QPushButton::clicked, this, &MainMenuPage::settingsClicked);
-    connect(m_btnExit, &QPushButton::clicked, this, &MainMenuPage::exitClicked);
+    connect(m_btnExit,     &QPushButton::clicked, this, &MainMenuPage::exitClicked);
 }

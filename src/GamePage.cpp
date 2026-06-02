@@ -14,6 +14,7 @@
 
 #include "GamePage.h"
 #include "WorldMap.h"
+#include "style.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -38,12 +39,6 @@ GamePage::GamePage(WorldMap *map, QWidget *parent)
 }
 
 // ---- Helpers ---------------------------------------------------------------
-static QLabel *makeStyledLabel(const QString &style, QWidget *parent) {
-    auto *l = new QLabel(parent);
-    l->setStyleSheet(style);
-    return l;
-}
-
 static QPushButton *makeNavBtn(const QString &text, const QString &style,
                                 QWidget *parent) {
     auto *b = new QPushButton(text, parent);
@@ -63,44 +58,58 @@ void GamePage::setupUI()
     // ---- Top row: stats (left) + location info (right) ----
     auto *topRow = new QHBoxLayout();
 
-    // -- Stats --
-    auto *statsBox = new QVBoxLayout();
-    statsBox->setSpacing(2);
-    const QString statStyle = QStringLiteral(
-        "QLabel{color:#e0e0e0;font-size:15px;font-family:monospace}");
+    // -- Stats panel --
+    auto *statsPanel = new QWidget(this);
+    statsPanel->setStyleSheet(QStringLiteral(
+        "QWidget#statsPanel{background-color:%1;border:1px solid %2;border-radius:8px}")
+        .arg(Style::kPanelBg, Style::kBorder));
+    statsPanel->setObjectName("statsPanel");
+    auto *statsBox = new QVBoxLayout(statsPanel);
+    statsBox->setContentsMargins(10, 6, 10, 6);
+    statsBox->setSpacing(1);
 
-    m_hpLabel    = makeStyledLabel(statStyle, this);
-    m_hungerLabel = makeStyledLabel(statStyle, this);
-    m_thirstLabel = makeStyledLabel(statStyle, this);
-    m_sanityLabel = makeStyledLabel(statStyle, this);
-    m_restLabel  = makeStyledLabel(statStyle, this);
-
-    statsBox->addWidget(m_hpLabel);
-    statsBox->addWidget(m_hungerLabel);
-    statsBox->addWidget(m_thirstLabel);
-    statsBox->addWidget(m_sanityLabel);
-    statsBox->addWidget(m_restLabel);
+    struct StatCfg { QLabel **ptr; const char *icon; const char *prefix; };
+    const StatCfg cfg[] = {
+        {&m_hpLabel,    "❤",  "HP"},
+        {&m_hungerLabel,"🍖",  "饥饿"},
+        {&m_thirstLabel,"💧",  "口渴"},
+        {&m_sanityLabel,"🧠",  "理智"},
+        {&m_restLabel,  "💤",  "休息"},
+    };
+    for (auto &c : cfg) {
+        *c.ptr = new QLabel(this);
+        statsBox->addWidget(*c.ptr);
+    }
     statsBox->addStretch();
-    topRow->addLayout(statsBox);
+    topRow->addWidget(statsPanel);
 
     topRow->addStretch();
 
-    // -- Location info --
-    auto *locBox = new QVBoxLayout();
-    locBox->setSpacing(2);
-    const QString locStyle = QStringLiteral(
-        "QLabel{color:#c0c0d0;font-size:14px;font-family:monospace}");
+    // -- Location & time --
+    auto *locPanel = new QWidget(this);
+    locPanel->setStyleSheet(QStringLiteral(
+        "QWidget#locPanel{background-color:%1;border:1px solid %2;border-radius:8px}")
+        .arg(Style::kPanelBg, Style::kBorder));
+    locPanel->setObjectName("locPanel");
+    auto *locBox = new QVBoxLayout(locPanel);
+    locBox->setContentsMargins(10, 6, 10, 6);
+    locBox->setSpacing(1);
 
-    m_timeLabel = new QLabel(this); m_timeLabel->setStyleSheet(
-        "QLabel{color:#e94560;font-size:16px;font-weight:bold;font-family:monospace}");
-    m_tileLabel = makeStyledLabel(locStyle, this);
-    m_locLabel  = makeStyledLabel(locStyle, this);
-
-    locBox->addWidget(m_timeLabel, 0, Qt::AlignRight);
-    locBox->addWidget(m_tileLabel, 0, Qt::AlignRight);
-    locBox->addWidget(m_locLabel, 0, Qt::AlignRight);
+    m_timeLabel  = new QLabel(this);
+    m_timeLabel->setStyleSheet(QStringLiteral(
+        "QLabel{color:%1;font-size:17px;font-weight:bold;font-family:monospace}")
+        .arg(Style::kAccent));
+    m_tileLabel  = new QLabel(this);
+    m_tileLabel->setStyleSheet(QStringLiteral(
+        "QLabel{color:%1;font-size:13px;font-family:monospace}").arg(Style::kTextDim));
+    m_locLabel   = new QLabel(this);
+    m_locLabel->setStyleSheet(QStringLiteral(
+        "QLabel{color:%1;font-size:13px;font-family:monospace}").arg(Style::kTextDim));
+    locBox->addWidget(m_timeLabel,  0, Qt::AlignRight);
+    locBox->addWidget(m_tileLabel,  0, Qt::AlignRight);
+    locBox->addWidget(m_locLabel,   0, Qt::AlignRight);
     locBox->addStretch();
-    topRow->addLayout(locBox);
+    topRow->addWidget(locPanel);
 
     outer->addLayout(topRow);
 
@@ -116,42 +125,48 @@ void GamePage::setupUI()
     // ---- Element table (center) ----
     m_elemTable = new QTableWidget(0, 2, this);
     m_elemTable->setHorizontalHeaderLabels(
-        {QStringLiteral("名称"), QStringLiteral("功能")});
+        {QStringLiteral("名称"), QStringLiteral("操作")});
     m_elemTable->horizontalHeader()->setStretchLastSection(true);
     m_elemTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     m_elemTable->verticalHeader()->setVisible(false);
     m_elemTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_elemTable->setSelectionMode(QAbstractItemView::NoSelection);
     m_elemTable->setFocusPolicy(Qt::NoFocus);
+    m_elemTable->setShowGrid(false);
+    m_elemTable->setAlternatingRowColors(true);
     m_elemTable->setStyleSheet(QStringLiteral(
-        "QTableWidget{background-color:#0f0f1a;color:#e0e0e0;"
-        "gridline-color:#1a1a2e;border:1px solid #1a1a2e;font-size:14px}"
-        "QHeaderView::section{background-color:#16213e;color:#c0c0d0;"
-        "border:none;padding:6px;font-weight:bold}"));
+        "QTableWidget{background-color:%1;color:%2;border:1px solid %3;"
+        "border-radius:8px;font-size:14px;alternate-background-color:#13132a}"
+        "QHeaderView::section{background-color:%4;color:%5;"
+        "border:none;padding:8px;font-weight:bold;font-size:13px}")
+        .arg(Style::kPanelBg, Style::kText, Style::kBorder,
+             Style::kPanelBg, Style::kAccent));
     outer->addWidget(m_elemTable, 1);
 
     // ---- Bottom row: navigation buttons ----
     auto *bottomRow = new QHBoxLayout();
     const QString navBtnStyle = QStringLiteral(
-        "QPushButton{background-color:#16213e;color:#c0c0d0;"
-        "border:1px solid #0f3460;border-radius:6px;"
-        "font-size:14px;padding:8px 16px;min-width:80px}"
-        "QPushButton:hover{background-color:#0f3460;color:#ffffff;border-color:#e94560}");
+        "QPushButton{background-color:%1;color:%2;"
+        "border:1px solid %3;border-radius:8px;"
+        "font-size:14px;padding:8px 20px;min-width:80px}"
+        "QPushButton:hover{background-color:%1;color:white;border-color:%4}")
+        .arg(Style::kPanelBg, Style::kText, Style::kBorder, Style::kAccent);
 
-    m_btnBigMap   = makeNavBtn(QStringLiteral("大地图"),   navBtnStyle, this);
-    m_btnSmallMap = makeNavBtn(QStringLiteral("小地图"),   navBtnStyle, this);
-    m_btnBackpack = makeNavBtn(QStringLiteral("背包"),     navBtnStyle, this);
+    m_btnBigMap   = makeNavBtn(QStringLiteral("🗺 大地图"), navBtnStyle, this);
+    m_btnSmallMap = makeNavBtn(QStringLiteral("📋 小地图"), navBtnStyle, this);
+    m_btnBackpack = makeNavBtn(QStringLiteral("🎒 背包"),   navBtnStyle, this);
 
     bottomRow->addWidget(m_btnBigMap);
     bottomRow->addWidget(m_btnSmallMap);
     bottomRow->addWidget(m_btnBackpack);
     bottomRow->addStretch();
 
-    m_btnGameMenu = new QPushButton(QStringLiteral("游戏菜单"), this);
+    m_btnGameMenu = new QPushButton(QStringLiteral("☰ 菜单"), this);
     m_btnGameMenu->setStyleSheet(QStringLiteral(
-        "QPushButton{background-color:#e94560;color:#ffffff;border:none;"
-        "border-radius:6px;font-size:14px;padding:8px 20px;min-width:100px}"
-        "QPushButton:hover{background-color:#ff6b81}"));
+        "QPushButton{background-color:%1;color:white;border:none;"
+        "border-radius:8px;font-size:14px;padding:8px 20px;min-width:80px}"
+        "QPushButton:hover{background-color:%2}")
+        .arg(Style::kAccent, Style::kAccentH));
     m_btnGameMenu->setCursor(Qt::PointingHandCursor);
     bottomRow->addWidget(m_btnGameMenu);
 
@@ -423,9 +438,26 @@ void GamePage::refreshLocationInfo()
 // ---------------------------------------------------------------------------
 void GamePage::refreshStats()
 {
-    QLabel *labels[] = { m_hpLabel, m_hungerLabel, m_thirstLabel, m_sanityLabel, m_restLabel };
-    for (int i = 0; i < kStatCount; ++i)
-        labels[i]->setText(m_stats.statString(static_cast<Stat>(i)));
+    struct { QLabel *label; Stat stat; const char *icon; const char *name; } m[] = {
+        {m_hpLabel,    Stat::Hp,     "❤",  "HP"},
+        {m_hungerLabel,Stat::Hunger, "🍖",  "饥饿"},
+        {m_thirstLabel,Stat::Thirst, "💧",  "口渴"},
+        {m_sanityLabel,Stat::Sanity, "🧠",  "理智"},
+        {m_restLabel,  Stat::Rest,   "💤",  "休息"},
+    };
+    for (auto &e : m) {
+        int v = static_cast<int>(m_stats.value(e.stat));
+        // Colour: red below 30, yellow 30-60, green above 60
+        const char *color = (v <= 30) ? "#e94560" : (v <= 60) ? "#e0b040" : "#4eca6a";
+        e.label->setStyleSheet(QStringLiteral(
+            "QLabel{color:%1;font-size:14px;font-family:monospace;font-weight:bold}")
+            .arg(color));
+        // Bar: 15 blocks
+        int barLen = qBound(0, v * 15 / 100, 15);
+        QString bar = QString(barLen, QChar(0x2588)) + QString(15 - barLen, QChar(0x2591));
+        e.label->setText(QStringLiteral("%1 %2 %3/%4  %5")
+            .arg(e.icon, e.name).arg(v).arg(100).arg(bar));
+    }
 }
 
 void GamePage::applyItemEffects(const std::vector<StatChange> &effects)
